@@ -1,0 +1,15 @@
+CMakeCache.txt
+CMakeFiles/
+Makefile
+async
+cmake_install.cmake
+hello_kinetic
+ise
+kineticstat
+read_file_blocking
+read_file_nonblocking
+set_acls
+setclusterversion
+setpin
+vendor/
+write_file_blocking
