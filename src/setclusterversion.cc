@@ -1,3 +1,5 @@
+// This allows changing a drive's cluster version
+
 #include <stdio.h>
 
 #include "protobufutil/message_stream.h"

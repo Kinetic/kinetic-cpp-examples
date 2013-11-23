@@ -1,3 +1,5 @@
+// This is shows a minimal example of issuing an async request and processing the result
+
 #include <fcntl.h>
 #include <sys/select.h>
 

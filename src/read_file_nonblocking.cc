@@ -1,3 +1,5 @@
+// This reads a file stored using write_file_blocking.cc using the nonblocking API
+
 #include <stdio.h>
 #include <glog/logging.h>
 #include <sys/fcntl.h>

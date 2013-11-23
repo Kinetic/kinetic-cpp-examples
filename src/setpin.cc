@@ -1,3 +1,5 @@
+// This allows setting and changing a drive's PIN
+
 #include <stdio.h>
 
 #include "protobufutil/message_stream.h"

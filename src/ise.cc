@@ -1,3 +1,5 @@
+// This shows how to erase a drive
+
 #include <stdio.h>
 
 #include "protobufutil/message_stream.h"

@@ -1,3 +1,5 @@
+// This sets some hard-coded ACLs in the given drive
+
 #include <stdio.h>
 
 #include "protobufutil/message_stream.h"

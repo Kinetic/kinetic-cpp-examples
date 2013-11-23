@@ -1,3 +1,5 @@
+// This writes the given file to a drive as a series of 1MB chunks and a metadata key
+
 #include <stdio.h>
 #include <glog/logging.h>
 #include <sys/fcntl.h>

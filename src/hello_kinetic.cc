@@ -1,3 +1,5 @@
+// This is a minimal blocking get/blocking put example
+
 #include <stdio.h>
 
 #include "glog/logging.h"
