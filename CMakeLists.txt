@@ -1,7 +1,9 @@
 cmake_minimum_required(VERSION 2.8.6)
 project(kinetic_cpp_client_examples CXX C)
 
-set(CMAKE_CXX_FLAGS "-g --std=c++11 -Wall -Wextra -Werror -Wno-unused-parameter ${PTHREAD_FLAG} -DGTEST_USE_OWN_TR1_TUPLE=1")
+find_package (Threads)
+
+set(CMAKE_CXX_FLAGS "-g --std=c++11 -Wall -Wextra -Werror -Wno-unused-parameter -DGTEST_USE_OWN_TR1_TUPLE=1")
 
 set(GENERATED_SOURCES_PATH ${kinetic_cpp_client_SOURCE_DIR}/src/main/generated)
 
@@ -32,6 +34,7 @@ set(LIBRARY_DEPENDENCIES
     ${kinetic_cpp_client_examples_SOURCE_DIR}/vendor/src/kinetic_cpp_client/vendor/src/protobufutil/vendor/lib/libssl.a
     ${kinetic_cpp_client_examples_SOURCE_DIR}/vendor/src/kinetic_cpp_client/vendor/src/protobufutil/vendor/lib/libcrypto.a
     ${kinetic_cpp_client_examples_SOURCE_DIR}/vendor/src/kinetic_cpp_client/vendor/src/protobufutil/vendor/lib/libprotobuf.a
+    ${CMAKE_THREAD_LIBS_INIT}
     dl
 )
 
