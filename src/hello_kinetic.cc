@@ -1,15 +1,13 @@
 // This is a minimal blocking get/blocking put example
 
 #include <stdio.h>
+#include <glog/logging.h>
 
-#include "glog/logging.h"
 #include "protobufutil/message_stream.h"
 
 #include "connection_options.h"
 #include "hmac_provider.h"
 #include "kinetic_connection_factory.h"
-#include "kinetic_connection.h"
-#include "kinetic_record.h"
 #include "value_factory.h"
 
 using com::seagate::kinetic::HmacProvider;
@@ -26,10 +24,7 @@ using palominolabs::protobufutil::MessageStreamFactory;
 int main(int argc, char* argv[]) {
     (void) argc;
 
-    google::InitGoogleLogging(argv[0]);
-    FLAGS_logtostderr = 1;
-
-    LOG(INFO)<< "Hello Kinetic Client!";
+    printf("Hello Kinetic Client!\n");
 
     kinetic::ConnectionOptions options;
     options.host = std::string("localhost");
@@ -44,16 +39,23 @@ int main(int argc, char* argv[]) {
             message_stream_factory);
 
     kinetic::KineticConnection* kinetic_connection;
-    CHECK(
-            kinetic_connection_factory.NewConnection(options, &kinetic_connection).ok());
+    if(!kinetic_connection_factory.NewConnection(options, &kinetic_connection).ok()) {
+        printf("Unable to connect\n");
+        return 1;
+    }
 
     std::string key = "key";
     std::string value, version, tag;
-    CHECK(
-            kinetic_connection->Put(key, "",
-                    KineticRecord("the value", "", "", Message_Algorithm_SHA1)).ok());
-    CHECK(kinetic_connection->Get(key, &value, &version, &tag).ok());
-    LOG(INFO)<< "Value for " << key << " is <" << value << ">";
+    if(!kinetic_connection->Put(key, "",
+                    KineticRecord("the value", "", "", Message_Algorithm_SHA1)).ok()) {
+        printf("Unable to PUT\n");
+        return 1;
+    }
+    if(!kinetic_connection->Get(key, &value, &version, &tag).ok()) {
+        printf("Unable to GET\n");
+        return 1;
+    }
+    printf("Value for %s is <%s>\n", key.c_str(), value.c_str());
 
     return 0;
 }

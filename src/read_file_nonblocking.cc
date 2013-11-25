@@ -3,28 +3,14 @@
 #include <stdio.h>
 #include <glog/logging.h>
 #include <sys/fcntl.h>
-#include <sys/stat.h>
 #include <sys/mman.h>
-#include <sys/types.h>
-#include <fcntl.h>
 
 #include "protobufutil/message_stream.h"
 
 #include "connection_options.h"
 #include "hmac_provider.h"
 #include "kinetic_connection_factory.h"
-#include "kinetic_connection.h"
-#include "kinetic_record.h"
 #include "value_factory.h"
-#include <sys/select.h>
-
-#include "glog/logging.h"
-
-#include "fcntl.h"
-#include "hmac_provider.h"
-#include "kinetic.pb.h"
-#include "nonblocking_kinetic_connection.h"
-#include "nonblocking_message_service.h"
 #include "socket_wrapper.h"
 
 using com::seagate::kinetic::HmacProvider;
@@ -50,7 +36,10 @@ class TestCallback : public GetCallbackInterface {
 public:
     TestCallback(char* buffer, unsigned int expected_length, int* remaining) : buffer_(buffer), expected_length_(expected_length), remaining_(remaining) {};
     void Call(const std::string &value, const std::string &version, const std::string &tag) {
-        CHECK_EQ(expected_length_, value.size());
+        if(expected_length_ != value.size()) {
+            printf("Received value chunk of wrong size\n");
+            exit(1);
+        }
         value.copy(buffer_, expected_length_);
         printf(".");
         fflush(stdout);
@@ -86,12 +75,17 @@ int main(int argc, char* argv[]) {
             message_stream_factory);
 
     kinetic::KineticConnection* kinetic_connection;
-    CHECK(
-    kinetic_connection_factory.NewConnection(options, &kinetic_connection).ok());
+    if(!kinetic_connection_factory.NewConnection(options, &kinetic_connection).ok()) {
+        printf("Unable to connect\n");
+        return 1;
+    }
 
 
     std::string value;
-    CHECK(kinetic_connection->Get(kinetic_key, &value, NULL, NULL).ok());
+    if(!kinetic_connection->Get(kinetic_key, &value, NULL, NULL).ok()) {
+        printf("Unable to get metadata\n");
+        return 1;
+    }
 
     unsigned int file_size = std::stoi(value);
     printf("Reading file of size %d\n", file_size);
@@ -103,9 +97,18 @@ int main(int argc, char* argv[]) {
     kinetic_connection_factory.NewNonblockingConnection(options, &connection);
 
     int file = open(output_file_name, O_RDWR | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);
-    PCHECK(file);
-    PCHECK((off_t)(file_size - 1) == lseek(file, file_size - 1, SEEK_SET));
-    PCHECK(1 == write(file, " ", 1));
+    if(!file) {
+        printf("Unable to open output file\n");
+        return 1;
+    }
+    if((off_t)(file_size - 1) != lseek(file, file_size - 1, SEEK_SET)) {
+        printf("Unable to seek in file\n");
+        return 1;
+    }
+    if(write(file, " ", 1) != 1) {
+        printf("Unable to resize file\n");
+        return 1;
+    }
     char* output_buffer = (char*)mmap(0, file_size, PROT_READ | PROT_WRITE, MAP_SHARED, file, 0);
     char key_buffer[100];
     int remaining = 0;

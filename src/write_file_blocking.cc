@@ -1,7 +1,6 @@
 // This writes the given file to a drive as a series of 1MB chunks and a metadata key
 
 #include <stdio.h>
-#include <glog/logging.h>
 #include <sys/fcntl.h>
 #include <sys/mman.h>
 
@@ -10,8 +9,6 @@
 #include "connection_options.h"
 #include "hmac_provider.h"
 #include "kinetic_connection_factory.h"
-#include "kinetic_connection.h"
-#include "kinetic_record.h"
 #include "value_factory.h"
 
 using com::seagate::kinetic::HmacProvider;
@@ -49,8 +46,10 @@ int main(int argc, char* argv[]) {
             message_stream_factory);
 
     kinetic::KineticConnection* kinetic_connection;
-    CHECK(
-    kinetic_connection_factory.NewConnection(options, &kinetic_connection).ok());
+    if (!kinetic_connection_factory.NewConnection(options, &kinetic_connection).ok()) {
+        printf("Unable to connect\n");
+        return 1;
+    }
 
     int file = open(input_file_name, O_RDONLY);
     struct stat inputfile_stat;
@@ -67,18 +66,26 @@ int main(int argc, char* argv[]) {
 
         std::string key(key_buffer);
         std::string value(inputfile_data + i, value_size);
-        CHECK(
-        kinetic_connection->Put(key, "",
-                KineticRecord(value, "", "", Message_Algorithm_SHA1)).ok());
+        if(!kinetic_connection->Put(key, "",
+                KineticRecord(value, "", "", Message_Algorithm_SHA1)).ok()) {
+            printf("Unable to write a chunk\n");
+            return 1;
+        }
         printf(".");
         fflush(stdout);
     }
     printf("\n");
 
 
-    CHECK(kinetic_connection->Put(kinetic_key, "", KineticRecord(std::to_string(inputfile_stat.st_size), "", "", Message_Algorithm_SHA1)).ok());
+    if (!kinetic_connection->Put(kinetic_key, "", KineticRecord(std::to_string(inputfile_stat.st_size), "", "", Message_Algorithm_SHA1)).ok()) {
+        printf("Unable to write metadata\n");
+        return 1;
+    }
 
-    CHECK(!close(file));
+    if (!close(file)) {
+        printf("Unable to close file\n");
+        return 1;
+    }
 
     printf("Done!\n");
 

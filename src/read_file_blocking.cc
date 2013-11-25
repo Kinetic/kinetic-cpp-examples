@@ -1,20 +1,14 @@
 // This reads a file stored using write_file_blocking.cc using the blocking API
 
 #include <stdio.h>
-#include <glog/logging.h>
 #include <sys/fcntl.h>
-#include <sys/stat.h>
 #include <sys/mman.h>
-#include <sys/types.h>
-#include <fcntl.h>
 
 #include "protobufutil/message_stream.h"
 
 #include "connection_options.h"
 #include "hmac_provider.h"
 #include "kinetic_connection_factory.h"
-#include "kinetic_connection.h"
-#include "kinetic_record.h"
 #include "value_factory.h"
 
 using com::seagate::kinetic::HmacProvider;
@@ -52,22 +46,34 @@ int main(int argc, char* argv[]) {
             message_stream_factory);
 
     kinetic::KineticConnection* kinetic_connection;
-    CHECK(
-    kinetic_connection_factory.NewConnection(options, &kinetic_connection).ok());
+    if(!kinetic_connection_factory.NewConnection(options, &kinetic_connection).ok()) {
+        printf("Unable to connect\n");
+        return 1;
+    }
 
 
     std::string value;
-    CHECK(kinetic_connection->Get(kinetic_key, &value, NULL, NULL).ok());
+    if(!kinetic_connection->Get(kinetic_key, &value, NULL, NULL).ok()) {
+        printf("Unable to get metadata\n");
+        return 1;
+    }
 
     int file_size = std::stoi(value);
     printf("Reading file of size %d\n", file_size);
 
-
-
     int file = open(output_file_name, O_RDWR | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);
-    PCHECK(file);
-    PCHECK(file_size - 1 == lseek(file, file_size - 1, SEEK_SET));
-    PCHECK(1 == write(file, " ", 1));
+    if(!file) {
+        printf("Unable to open output file\n");
+        return 1;
+    }
+    if(file_size - 1 != lseek(file, file_size - 1, SEEK_SET)) {
+        printf("Unable to seek\n");
+        return 1;
+    }
+    if(write(file, " ", 1) != 1) {
+        printf("Unable to resize file\n");
+        return 1;
+    }
     char* output_buffer = (char*)mmap(0, file_size, PROT_READ | PROT_WRITE, MAP_SHARED, file, 0);
     char key_buffer[100];
     for (int i = 0; i < file_size; i += 1024*1024) {
@@ -80,14 +86,20 @@ int main(int argc, char* argv[]) {
         sprintf(key_buffer, "%s-%10d", kinetic_key, i);
         std::string key(key_buffer);
 
-        CHECK(kinetic_connection->Get(key, &value, NULL, NULL).ok());
+        if(!kinetic_connection->Get(key, &value, NULL, NULL).ok()) {
+            printf("Unable to get chunk\n");
+            return 1;
+        }
         value.copy(output_buffer + i, block_length);
         printf(".");
         fflush(stdout);
     }
     printf("\n");
 
-    CHECK(!close(file));
+    if(!close(file)) {
+        printf("Unable to close file\n");
+        return 1;
+    }
 
 
     printf("Done!\n");

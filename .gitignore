@@ -16,3 +16,4 @@ write_file_blocking
 CMakeScripts/
 kinetic_cpp_client_examples.build/
 kinetic_cpp_client_examples.xcodeproj/
+.idea

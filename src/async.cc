@@ -3,14 +3,10 @@
 #include <fcntl.h>
 #include <sys/select.h>
 
-#include "glog/logging.h"
 #include "protobufutil/message_stream.h"
 
 #include "hmac_provider.h"
-#include "kinetic.pb.h"
 #include "kinetic_connection_factory.h"
-#include "nonblocking_kinetic_connection.h"
-#include "nonblocking_message_service.h"
 #include "socket_wrapper.h"
 #include "value_factory.h"
 
@@ -27,14 +23,11 @@ using palominolabs::protobufutil::MessageStreamFactory;
 class TestCallback : public GetCallbackInterface {
     public:
     void Call(const std::string &value, const std::string &version, const std::string &tag) {
-        LOG(INFO) << "The callback got called!";
+        printf("The callback got called!");
     }
 };
 
 int main(int argc, char* argv[]) {
-    google::InitGoogleLogging(argv[0]);
-    FLAGS_logtostderr = 1;
-
     ConnectionOptions options = {
         .host = "localhost",
         .port = 8123,
@@ -50,7 +43,10 @@ int main(int argc, char* argv[]) {
             message_stream_factory);
 
     kinetic::NonblockingKineticConnection *connection;
-    CHECK(kinetic_connection_factory.NewNonblockingConnection(options, &connection).ok());
+    if(!kinetic_connection_factory.NewNonblockingConnection(options, &connection).ok()) {
+        printf("Unable to connect");
+        return 1;
+    }
 
     TestCallback *callback = new TestCallback;
     connection->Get("key", callback);

@@ -4,13 +4,9 @@
 #include <inttypes.h>
 #include <stdio.h>
 
-#include "glog/logging.h"
-
 #include "connection_options.h"
 #include "hmac_provider.h"
 #include "kinetic_connection_factory.h"
-#include "kinetic_connection.h"
-#include "kinetic_record.h"
 #include "value_factory.h"
 
 using com::seagate::kinetic::HmacProvider;
@@ -52,13 +48,18 @@ int main(int argc, char* argv[]) {
             message_stream_factory);
 
     kinetic::KineticConnection* kinetic_connection;
-    CHECK(
-            kinetic_connection_factory.NewConnection(options, &kinetic_connection).ok());
+    if(!kinetic_connection_factory.NewConnection(options, &kinetic_connection).ok()) {
+        printf("Unable to connect\n");
+        return 1;
+    }
 
     if (argc == 2) {
         // User just specified host so dump everything
         DriveLog drive_log;
-        CHECK(kinetic_connection->GetLog(&drive_log).ok());
+        if(!kinetic_connection->GetLog(&drive_log).ok()) {
+            printf("Unable to get log\n");
+            return 1;
+        }
 
         dump_all_information(drive_log);
     } else {
@@ -69,7 +70,10 @@ int main(int argc, char* argv[]) {
         int report_number = 0;
         while (true) {
             DriveLog drive_log;
-            CHECK(kinetic_connection->GetLog(&drive_log).ok());
+            if(!kinetic_connection->GetLog(&drive_log).ok()) {
+                printf("Unable to get log\n");
+                return 1;
+            }
 
             bool print_headers = report_number % 5 == 0;
 
