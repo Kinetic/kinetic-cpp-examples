@@ -18,3 +18,4 @@ kinetic_cpp_client_examples.build/
 kinetic_cpp_client_examples.xcodeproj/
 .idea
 delete_file_nonblocking
+write_file_nonblocking

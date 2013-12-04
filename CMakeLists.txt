@@ -12,7 +12,7 @@ ExternalProject_add(
     kinetic_cpp_client
     PREFIX "vendor"
     GIT_REPOSITORY "git@gitlab.pl-ops.net:seagate/kinetic_cpp_client.git"
-    GIT_TAG "origin/features/asynchronous-get"
+    GIT_TAG origin/features/asynchronous-get
     BUILD_IN_SOURCE 1
     INSTALL_COMMAND ""
 )
@@ -62,4 +62,5 @@ add_example_target(write_file_blocking)
 add_example_target(read_file_blocking)
 add_example_target(read_file_nonblocking)
 add_example_target(delete_file_nonblocking)
+add_example_target(write_file_nonblocking)
 
