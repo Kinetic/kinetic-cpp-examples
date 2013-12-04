@@ -11,8 +11,8 @@ include(ExternalProject)
 ExternalProject_add(
     kinetic_cpp_client
     PREFIX "vendor"
-    GIT_REPOSITORY "git@github.com:Seagate/Kinetic-C-Client.git"
-    GIT_TAG "origin/master"
+    GIT_REPOSITORY "git@gitlab.pl-ops.net:seagate/kinetic_cpp_client.git"
+    GIT_TAG "origin/features/asynchronous-get"
     BUILD_IN_SOURCE 1
     INSTALL_COMMAND ""
 )
@@ -42,6 +42,13 @@ macro(add_example_target NAME)
     add_executable(${NAME} src/${NAME}.cc)
     target_link_libraries(${NAME} ${LIBRARY_DEPENDENCIES})
     add_dependencies(${NAME} kinetic_cpp_client)
+
+    set_target_properties( ${NAME} PROPERTIES
+        RUNTIME_OUTPUT_DIRECTORY_DEBUG   ${CMAKE_SOURCE_DIR}
+        RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_SOURCE_DIR}
+        ARCHIVE_OUTPUT_DIRECTORY_DEBUG ${CMAKE_SOURCE_DIR}
+        ARCHIVE_OUTPUT_DIRECTORY_RELEASE ${CMAKE_SOURCE_DIR}
+    )
 endmacro(add_example_target)
 
 add_example_target(hello_kinetic)
@@ -54,4 +61,5 @@ add_example_target(set_acls)
 add_example_target(write_file_blocking)
 add_example_target(read_file_blocking)
 add_example_target(read_file_nonblocking)
+add_example_target(delete_file_nonblocking)
 

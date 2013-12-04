@@ -82,7 +82,7 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    if (!close(file)) {
+    if (close(file)) {
         printf("Unable to close file\n");
         return 1;
     }

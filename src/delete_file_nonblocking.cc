@@ -1,4 +1,4 @@
-// This reads a file stored using write_file_blocking.cc using the nonblocking API
+// This deletes a file written using write_file_(non)blocking
 
 #include <stdio.h>
 #include <glog/logging.h>
@@ -22,49 +22,37 @@ using kinetic::KineticConnection;
 using kinetic::KineticConnectionFactory;
 using kinetic::Status;
 using kinetic::KineticRecord;
+using kinetic::DeleteCallbackInterface;
+using kinetic::NonblockingError;
 using palominolabs::protobufutil::MessageStreamFactory;
-using com::seagate::kinetic::HmacProvider;
-using kinetic::NonblockingError ;
-using kinetic::ConnectionOptions;
-using kinetic::GetCallbackInterface;
-using kinetic::Message;
-using kinetic::NonblockingKineticConnection;
-using kinetic::SocketWrapper;
 
-class TestCallback : public GetCallbackInterface {
+class DeleteCallback : public DeleteCallbackInterface {
 public:
-    TestCallback(char* buffer, unsigned int expected_length, int* remaining) : buffer_(buffer), expected_length_(expected_length), remaining_(remaining) {};
-    void Success(const std::string &value, const std::string &version,
-            const std::string &tag) {
-        if(expected_length_ != value.size()) {
-            printf("Received value chunk of wrong size\n");
-            exit(1);
-        }
-        value.copy(buffer_, expected_length_);
+    DeleteCallback(int* remaining) : remaining_(remaining) {};
+    void Success() {
         printf(".");
         fflush(stdout);
         (*remaining_)--;
     }
+
     void Failure(NonblockingError error) {
         printf("Error!\n");
         exit(1);
     }
 private:
-    char* buffer_;
-    unsigned int expected_length_;
     int* remaining_;
+
 };
 
 int main(int argc, char* argv[]) {
 
-    if (argc != 4) {
-        printf("%s: <host> <kinetic key> <output file name>\n", argv[0]);
+    if (argc != 3) {
+        printf("%s: <host> <kinetic key>\n", argv[0]);
         return 1;
     }
 
     const char* host = argv[1];
     const char* kinetic_key = argv[2];
-    const char* output_file_name = argv[3];
 
     kinetic::ConnectionOptions options;
     options.host = host;
@@ -92,7 +80,7 @@ int main(int argc, char* argv[]) {
     }
 
     unsigned int file_size = std::stoi(value);
-    printf("Reading file of size %d\n", file_size);
+    printf("Deleting file of size %d\n", file_size);
 
 
     delete kinetic_connection;
@@ -100,20 +88,6 @@ int main(int argc, char* argv[]) {
     kinetic::NonblockingKineticConnection* connection;
     kinetic_connection_factory.NewNonblockingConnection(options, &connection);
 
-    int file = open(output_file_name, O_RDWR | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);
-    if(!file) {
-        printf("Unable to open output file\n");
-        return 1;
-    }
-    if((off_t)(file_size - 1) != lseek(file, file_size - 1, SEEK_SET)) {
-        printf("Unable to seek in file\n");
-        return 1;
-    }
-    if(write(file, " ", 1) != 1) {
-        printf("Unable to resize file\n");
-        return 1;
-    }
-    char* output_buffer = (char*)mmap(0, file_size, PROT_READ | PROT_WRITE, MAP_SHARED, file, 0);
     char key_buffer[100];
     int remaining = 0;
     for (unsigned int i = 0; i < file_size; i += 1024*1024) {
@@ -124,10 +98,13 @@ int main(int argc, char* argv[]) {
 
         sprintf(key_buffer, "%s-%10d", kinetic_key, i);
         remaining++;
-        TestCallback* callback = new TestCallback(output_buffer + i, block_length, &remaining);
+        DeleteCallback* callback = new DeleteCallback(&remaining);
         std::string key(key_buffer);
-        connection->Get(key, callback);
+        connection->Delete(key, "", true, callback);
     }
+
+    remaining++;
+    connection->Delete(kinetic_key, "", true, new DeleteCallback(&remaining));
 
 
     fd_set read_fds, write_fds;
@@ -136,8 +113,6 @@ int main(int argc, char* argv[]) {
     while (remaining > 0) {
         connection->Run(&read_fds, &write_fds, &num_fds);
     }
-
-    CHECK(!close(file));
 
     printf("\nDone!\n");
 

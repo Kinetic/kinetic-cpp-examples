@@ -12,18 +12,22 @@
 
 using com::seagate::kinetic::HmacProvider;
 using com::seagate::kinetic::ValueFactory;
-using kinetic::CallbackInterface;
 using kinetic::ConnectionOptions;
 using kinetic::GetCallbackInterface;
 using kinetic::Message;
 using kinetic::NonblockingKineticConnection;
-using kinetic::NonblockingMessageService;
+using kinetic::NonblockingError;
 using palominolabs::protobufutil::MessageStreamFactory;
 
 class TestCallback : public GetCallbackInterface {
     public:
-    void Call(const std::string &value, const std::string &version, const std::string &tag) {
-        printf("The callback got called!");
+    void Success(const std::string &value, const std::string &version,
+            const std::string &tag) {
+        printf("The callback got called!\n");
+    }
+    virtual void Failure(NonblockingError error) {
+        printf("Error!\n");
+        exit(1);
     }
 };
 
@@ -52,8 +56,9 @@ int main(int argc, char* argv[]) {
     connection->Get("key", callback);
 
     fd_set read_fds, write_fds;
-    connection->Run(&read_fds, &write_fds);
-    connection->Run(&read_fds, &write_fds);
+    int num_fds = 0;
+    connection->Run(&read_fds, &write_fds, &num_fds);
+    connection->Run(&read_fds, &write_fds, &num_fds);
 
     delete callback;
     delete connection;
