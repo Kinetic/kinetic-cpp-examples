@@ -91,8 +91,8 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    unsigned int file_size = std::stoi(value);
-    printf("Reading file of size %d\n", file_size);
+    long long file_size = std::stoll(value);
+    printf("Reading file of size %llu\n", file_size);
 
 
     delete kinetic_connection;
@@ -116,24 +116,25 @@ int main(int argc, char* argv[]) {
     char* output_buffer = (char*)mmap(0, file_size, PROT_READ | PROT_WRITE, MAP_SHARED, file, 0);
     char key_buffer[100];
     int remaining = 0;
-    for (unsigned int i = 0; i < file_size; i += 1024*1024) {
+    fd_set read_fds, write_fds;
+    int num_fds = 0;
+    for (off_t i = 0; i < file_size; i += 1024*1024) {
         unsigned int block_length = 1024*1024;
         if (i + block_length > file_size) {
             block_length = file_size - i + 1;
         }
 
-        sprintf(key_buffer, "%s-%10d", kinetic_key, i);
+        sprintf(key_buffer, "%s-%10llu", kinetic_key, i);
         remaining++;
         TestCallback* callback = new TestCallback(output_buffer + i, block_length, &remaining);
         std::string key(key_buffer);
         connection->Get(key, callback);
+        connection->Run(&read_fds, &write_fds, &num_fds);
     }
 
-
-    fd_set read_fds, write_fds;
-    int num_fds = 0;
     connection->Run(&read_fds, &write_fds, &num_fds);
     while (remaining > 0) {
+        while(select(num_fds + 1, &read_fds, &write_fds, NULL, NULL) <= 0);
         connection->Run(&read_fds, &write_fds, &num_fds);
     }
 
