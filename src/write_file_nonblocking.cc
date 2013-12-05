@@ -1,8 +1,10 @@
-// This writes the given file to a drive as a series of 1MB chunks and a metadata key
+// This writes the given file to a drive as a series of 1MB chunks and a metadata
+// key using the nonblocking API
 
 #include <stdio.h>
 #include <sys/fcntl.h>
 #include <sys/mman.h>
+#include <inttypes.h>
 
 #include "protobufutil/message_stream.h"
 
@@ -84,7 +86,7 @@ int main(int argc, char* argv[]) {
             value_size = inputfile_stat.st_size - i + 1;
         }
 
-        sprintf(key_buffer, "%s-%10llu", kinetic_key, i);
+        sprintf(key_buffer, "%s-%10" PRId64, kinetic_key, (int64_t)i);
 
         std::string key(key_buffer);
         std::string value(inputfile_data + i, value_size);

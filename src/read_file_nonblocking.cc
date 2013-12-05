@@ -4,6 +4,7 @@
 #include <glog/logging.h>
 #include <sys/fcntl.h>
 #include <sys/mman.h>
+#include <inttypes.h>
 
 #include "protobufutil/message_stream.h"
 
@@ -124,7 +125,7 @@ int main(int argc, char* argv[]) {
             block_length = file_size - i + 1;
         }
 
-        sprintf(key_buffer, "%s-%10llu", kinetic_key, i);
+        sprintf(key_buffer, "%s-%10" PRId64, kinetic_key, (int64_t)i);
         remaining++;
         TestCallback* callback = new TestCallback(output_buffer + i, block_length, &remaining);
         std::string key(key_buffer);
