@@ -63,4 +63,5 @@ add_example_target(read_file_blocking)
 add_example_target(read_file_nonblocking)
 add_example_target(delete_file_nonblocking)
 add_example_target(write_file_nonblocking)
+add_example_target(firmware_update)
 

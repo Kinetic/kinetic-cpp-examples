@@ -19,3 +19,4 @@ kinetic_cpp_client_examples.xcodeproj/
 .idea
 delete_file_nonblocking
 write_file_nonblocking
+/firmware_update
