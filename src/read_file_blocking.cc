@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <sys/fcntl.h>
 #include <sys/mman.h>
+#include <inttypes.h>
 
 #include "protobufutil/message_stream.h"
 
@@ -76,14 +77,14 @@ int main(int argc, char* argv[]) {
     }
     char* output_buffer = (char*)mmap(0, file_size, PROT_READ | PROT_WRITE, MAP_SHARED, file, 0);
     char key_buffer[100];
-    for (off_t i = 0; i < file_size; i += 1024*1024) {
+    for (int64_t i = 0; i < file_size; i += 1024*1024) {
         int block_length = 1024*1024;
         if (i + block_length > file_size) {
             block_length = file_size - i;
         }
 
         std::string value;
-        sprintf(key_buffer, "%s-%10llu", kinetic_key, i);
+        sprintf(key_buffer, "%s-%10" PRId64, kinetic_key, i);
         std::string key(key_buffer);
 
         if(!kinetic_connection->Get(key, &value, NULL, NULL).ok()) {

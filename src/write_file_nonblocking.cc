@@ -80,13 +80,13 @@ int main(int argc, char* argv[]) {
     int remaining = 0;
     fd_set read_fds, write_fds;
     int num_fds = 0;
-    for (off_t i = 0; i < inputfile_stat.st_size; i += 1024*1024) {
+    for (int64_t i = 0; i < inputfile_stat.st_size; i += 1024*1024) {
         int value_size = 1024*1024;
         if (i + value_size > inputfile_stat.st_size) {
             value_size = inputfile_stat.st_size - i + 1;
         }
 
-        sprintf(key_buffer, "%s-%10" PRId64, kinetic_key, (int64_t)i);
+        sprintf(key_buffer, "%s-%10" PRId64, kinetic_key, i);
 
         std::string key(key_buffer);
         std::string value(inputfile_data + i, value_size);
