@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <sys/fcntl.h>
 #include <sys/mman.h>
+#include <inttypes.h>
 
 #include "protobufutil/message_stream.h"
 
@@ -56,13 +57,13 @@ int main(int argc, char* argv[]) {
     fstat(file, &inputfile_stat);
     char* inputfile_data = (char*)mmap(0, inputfile_stat.st_size, PROT_READ, MAP_SHARED, file, 0);
     char key_buffer[100];
-    for (int i = 0; i < inputfile_stat.st_size; i += 1024*1024) {
+    for (int64_t i = 0; i < inputfile_stat.st_size; i += 1024*1024) {
         int value_size = 1024*1024;
         if (i + value_size > inputfile_stat.st_size) {
             value_size = inputfile_stat.st_size - i + 1;
         }
 
-        sprintf(key_buffer, "%s-%10d", kinetic_key, i);
+        sprintf(key_buffer, "%s-%10" PRId64, kinetic_key, i);
 
         std::string key(key_buffer);
         std::string value(inputfile_data + i, value_size);

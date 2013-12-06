@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <sys/fcntl.h>
 #include <sys/mman.h>
+#include <inttypes.h>
 
 #include "protobufutil/message_stream.h"
 
@@ -58,8 +59,8 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    int file_size = std::stoi(value);
-    printf("Reading file of size %d\n", file_size);
+    ssize_t file_size = std::stoll(value);
+    printf("Reading file of size %zd\n", file_size);
 
     int file = open(output_file_name, O_RDWR | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);
     if(!file) {
@@ -76,14 +77,14 @@ int main(int argc, char* argv[]) {
     }
     char* output_buffer = (char*)mmap(0, file_size, PROT_READ | PROT_WRITE, MAP_SHARED, file, 0);
     char key_buffer[100];
-    for (int i = 0; i < file_size; i += 1024*1024) {
+    for (int64_t i = 0; i < file_size; i += 1024*1024) {
         int block_length = 1024*1024;
         if (i + block_length > file_size) {
             block_length = file_size - i;
         }
 
         std::string value;
-        sprintf(key_buffer, "%s-%10d", kinetic_key, i);
+        sprintf(key_buffer, "%s-%10" PRId64, kinetic_key, i);
         std::string key(key_buffer);
 
         if(!kinetic_connection->Get(key, &value, NULL, NULL).ok()) {
@@ -96,7 +97,7 @@ int main(int argc, char* argv[]) {
     }
     printf("\n");
 
-    if(!close(file)) {
+    if(close(file)) {
         printf("Unable to close file\n");
         return 1;
     }
