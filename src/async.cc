@@ -21,8 +21,8 @@ using palominolabs::protobufutil::MessageStreamFactory;
 
 class TestCallback : public GetCallbackInterface {
     public:
-    void Success(const std::string &value, const std::string &version,
-            const std::string &tag) {
+    void Success(const std::string &key, const std::string &value,
+            const std::string &version, const std::string &tag) {
         printf("The callback got called!\n");
     }
     virtual void Failure(NonblockingError error) {

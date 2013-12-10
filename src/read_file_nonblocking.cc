@@ -35,8 +35,8 @@ using kinetic::SocketWrapper;
 class TestCallback : public GetCallbackInterface {
 public:
     TestCallback(char* buffer, unsigned int expected_length, int* remaining) : buffer_(buffer), expected_length_(expected_length), remaining_(remaining) {};
-    void Success(const std::string &value, const std::string &version,
-            const std::string &tag) {
+    void Success(const std::string &key, const std::string &value,
+            const std::string &version, const std::string &tag) {
         if(expected_length_ != value.size()) {
             printf("Received value chunk of wrong size\n");
             exit(1);
