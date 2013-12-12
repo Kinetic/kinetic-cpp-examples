@@ -20,13 +20,13 @@ using com::seagate::kinetic::proto::Message_Algorithm_SHA1;
 using com::seagate::kinetic::ValueFactory;
 using kinetic::KineticConnection;
 using kinetic::KineticConnectionFactory;
-using kinetic::Status;
 using kinetic::KineticRecord;
-using kinetic::DeleteCallbackInterface;
 using kinetic::NonblockingError;
+using kinetic::SimpleCallbackInterface;
+using kinetic::Status;
 using palominolabs::protobufutil::MessageStreamFactory;
 
-class DeleteCallback : public DeleteCallbackInterface {
+class DeleteCallback : public SimpleCallbackInterface {
 public:
     DeleteCallback(int* remaining) : remaining_(remaining) {};
     void Success() {
