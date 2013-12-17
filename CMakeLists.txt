@@ -3,7 +3,7 @@ project(kinetic_cpp_client_examples CXX C)
 
 find_package (Threads)
 
-set(CMAKE_CXX_FLAGS "-g --std=c++11 -Wall -Wextra -Werror -Wno-unused-parameter -DGTEST_USE_OWN_TR1_TUPLE=1 -D__STDC_FORMAT_MACROS")
+set(CMAKE_CXX_FLAGS "-g --std=c++11 -Wall -Wextra -Werror -Wno-unused-parameter -Wno-unused-local-typedefs -DGTEST_USE_OWN_TR1_TUPLE=1 -D__STDC_FORMAT_MACROS")
 
 set(GENERATED_SOURCES_PATH ${kinetic_cpp_client_SOURCE_DIR}/src/main/generated)
 
