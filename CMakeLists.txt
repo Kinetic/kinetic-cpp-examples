@@ -3,7 +3,7 @@ project(kinetic_cpp_client_examples CXX C)
 
 find_package (Threads)
 
-set(CMAKE_CXX_FLAGS "-g --std=c++11 -Wall -Wextra -Werror -Wno-unknown-warning-option -Wno-unused-parameter -Wno-unused-local-typedefs -DGTEST_USE_OWN_TR1_TUPLE=1 -D__STDC_FORMAT_MACROS")
+set(CMAKE_CXX_FLAGS "-g --std=c++11 -Wall -Wextra -Werror -Wno-unknown-warning-option -Wno-unused-parameter -Wno-unused-local-typedefs -Wno-null-dereference -DGTEST_USE_OWN_TR1_TUPLE=1 -D__STDC_FORMAT_MACROS")
 
 set(GENERATED_SOURCES_PATH ${kinetic_cpp_client_SOURCE_DIR}/src/main/generated)
 
@@ -12,7 +12,7 @@ ExternalProject_add(
     kinetic_cpp_client
     PREFIX "vendor"
     GIT_REPOSITORY "git@github.com:Seagate/Kinetic-C-Client.git"
-    GIT_TAG "origin/master"
+    GIT_TAG "a56084c682f4d84cab7ecbca277cc1b3b09d49cd"
     BUILD_IN_SOURCE 1
     INSTALL_COMMAND ""
 )
@@ -27,7 +27,7 @@ include_directories(
 )
 
 set(LIBRARY_DEPENDENCIES
-    ${kinetic_cpp_client_examples_SOURCE_DIR}/vendor/src/kinetic_cpp_client/libkinetic_client_library.a
+    ${kinetic_cpp_client_examples_SOURCE_DIR}/vendor/src/kinetic_cpp_client/libkinetic_client.a
     ${kinetic_cpp_client_examples_SOURCE_DIR}/vendor/src/kinetic_cpp_client/vendor/src/protobufutil/libprotobufutil.a
     ${kinetic_cpp_client_examples_SOURCE_DIR}/vendor/src/kinetic_cpp_client/vendor/src/protobufutil/vendor/lib/libglog.a
     ${kinetic_cpp_client_examples_SOURCE_DIR}/vendor/src/kinetic_cpp_client/vendor/src/protobufutil/vendor/lib/libgflags.a
