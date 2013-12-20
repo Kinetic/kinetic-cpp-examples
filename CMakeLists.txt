@@ -23,7 +23,7 @@ include_directories(
     vendor/src/kinetic_cpp_client/vendor/src/protobufutil/vendor/src/gmock/fused-src
     vendor/src/kinetic_cpp_client/src/main
     vendor/src/kinetic_cpp_client/src/main/generated
-    vendor/src/kinetic_cpp_client/src/public_include
+    vendor/src/kinetic_cpp_client/include/kinetic
 )
 
 set(LIBRARY_DEPENDENCIES
