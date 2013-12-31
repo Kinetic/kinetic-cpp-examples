@@ -3,10 +3,7 @@
 #include <fcntl.h>
 #include <sys/select.h>
 
-#include "protobufutil/message_stream.h"
-
-#include "hmac_provider.h"
-#include "kinetic_connection_factory.h"
+#include "kinetic/kinetic_connection_factory.h"
 #include "socket_wrapper.h"
 #include "value_factory.h"
 
