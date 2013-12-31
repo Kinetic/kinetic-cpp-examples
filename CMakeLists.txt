@@ -12,7 +12,7 @@ ExternalProject_add(
     kinetic_cpp_client
     PREFIX "vendor"
     GIT_REPOSITORY "git@github.com:Seagate/Kinetic-C-Client.git"
-    GIT_TAG "4da601ba5a7979252bccd90257fc5f8f762a7d9b"
+    GIT_TAG "c9c578e88f76b4cffdd09ba49a334a7c84b8e8e6"
     BUILD_IN_SOURCE 1
     INSTALL_COMMAND ""
 )
@@ -23,7 +23,7 @@ include_directories(
     vendor/src/kinetic_cpp_client/vendor/src/protobufutil/vendor/src/gmock/fused-src
     vendor/src/kinetic_cpp_client/src/main
     vendor/src/kinetic_cpp_client/src/main/generated
-    vendor/src/kinetic_cpp_client/include/kinetic
+    vendor/src/kinetic_cpp_client/include
 )
 
 set(LIBRARY_DEPENDENCIES

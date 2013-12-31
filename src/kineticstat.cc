@@ -3,9 +3,8 @@
 #include <inttypes.h>
 #include <stdio.h>
 
-#include "connection_options.h"
-#include "hmac_provider.h"
-#include "kinetic_connection_factory.h"
+#include "kinetic/connection_options.h"
+#include "kinetic/kinetic_connection_factory.h"
 #include "value_factory.h"
 
 using com::seagate::kinetic::HmacProvider;
