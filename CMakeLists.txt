@@ -51,7 +51,6 @@ macro(add_example_target NAME)
     )
 endmacro(add_example_target)
 
-add_example_target(hello_kinetic)
 add_example_target(kineticstat)
 add_example_target(async)
 add_example_target(ise)
