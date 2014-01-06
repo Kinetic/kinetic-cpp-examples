@@ -17,7 +17,6 @@ using com::seagate::kinetic::proto::Message;
 using com::seagate::kinetic::proto::Message_MessageType_GET;
 using com::seagate::kinetic::proto::Message_Algorithm_SHA1;
 using com::seagate::kinetic::ValueFactory;
-using kinetic::KineticConnection;
 using kinetic::KineticConnectionFactory;
 using kinetic::Status;
 using kinetic::KineticRecord;
