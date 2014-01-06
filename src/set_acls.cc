@@ -38,22 +38,22 @@ int main(int argc, char* argv[]) {
 
     kinetic::KineticConnectionFactory kinetic_connection_factory = kinetic::NewKineticConnectionFactory();
 
-    kinetic::KineticConnection* kinetic_connection;
-    if (!kinetic_connection_factory.NewConnection(options, &kinetic_connection).ok()) {
+    kinetic::BlockingKineticConnection* kinetic_connection;
+    if (!kinetic_connection_factory.NewBlockingConnection(options, &kinetic_connection).ok()) {
         printf("Unable to connect\n");
         return 1;
     }
 
+    Domain domain1 = {.offset = 0, .value = "", .roles = {kinetic::GETLOG}};
     std::list<Domain> acl1_domains = {
-        {.offset = 0, .value = "", .roles = {kinetic::GETLOG}},
+        domain1,
     };
     ACL acl1;
     acl1.client_id = 1000;
     acl1.hmac_key = "foobarbaz";
     acl1.domains = acl1_domains;
 
-    std::list<Domain> acl2_domains = {
-        {.offset = 0, .value = "", .roles = {
+    Domain domain2 = {.offset = 0, .value = "", .roles = {
             kinetic::READ,
             kinetic::WRITE,
             kinetic::DELETE,
@@ -62,7 +62,9 @@ int main(int argc, char* argv[]) {
             kinetic::P2POP,
             kinetic::GETLOG,
             kinetic::SECURITY},
-        }
+    };
+    std::list<Domain> acl2_domains = {
+        domain2
     };
     ACL acl2;
     acl2.client_id = 1;
