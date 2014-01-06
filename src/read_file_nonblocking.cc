@@ -33,13 +33,12 @@ using kinetic::SocketWrapper;
 class TestCallback : public GetCallbackInterface {
 public:
     TestCallback(char* buffer, unsigned int expected_length, int* remaining) : buffer_(buffer), expected_length_(expected_length), remaining_(remaining) {};
-    void Success(const std::string &key, const std::string &value,
-            const std::string &version, const std::string &tag) {
-        if(expected_length_ != value.size()) {
+    void Success(const std::string &key, KineticRecord* record) {
+        if(expected_length_ != record->value().size()) {
             printf("Received value chunk of wrong size\n");
             exit(1);
         }
-        value.copy(buffer_, expected_length_);
+        record->value().copy(buffer_, expected_length_);
         printf(".");
         fflush(stdout);
         (*remaining_)--;
@@ -71,26 +70,23 @@ int main(int argc, char* argv[]) {
     options.user_id = 1;
     options.hmac_key = "asdfasdf";
 
-    HmacProvider hmac_provider;
-    ValueFactory value_factory;
-    MessageStreamFactory message_stream_factory(NULL, value_factory);
-    kinetic::KineticConnectionFactory kinetic_connection_factory(hmac_provider,
-            message_stream_factory);
+    KineticConnectionFactory kinetic_connection_factory = kinetic::NewKineticConnectionFactory();
 
-    kinetic::KineticConnection* kinetic_connection;
-    if(!kinetic_connection_factory.NewConnection(options, &kinetic_connection).ok()) {
+    kinetic::BlockingKineticConnection* kinetic_connection;
+    if(!kinetic_connection_factory.NewBlockingConnection(options, &kinetic_connection).ok()) {
         printf("Unable to connect\n");
         return 1;
     }
 
 
-    std::string value;
-    if(!kinetic_connection->Get(kinetic_key, &value, NULL, NULL).ok()) {
+    KineticRecord* record;
+    if(!kinetic_connection->Get(kinetic_key, &record).ok()) {
         printf("Unable to get metadata\n");
         return 1;
     }
 
-    long long file_size = std::stoll(value);
+    long long file_size = std::stoll(record->value());
+    delete record;
     printf("Reading file of size %llu\n", file_size);
 
 

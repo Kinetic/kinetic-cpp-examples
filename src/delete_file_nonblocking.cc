@@ -57,26 +57,23 @@ int main(int argc, char* argv[]) {
     options.user_id = 1;
     options.hmac_key = "asdfasdf";
 
-    HmacProvider hmac_provider;
-    ValueFactory value_factory;
-    MessageStreamFactory message_stream_factory(NULL, value_factory);
-    kinetic::KineticConnectionFactory kinetic_connection_factory(hmac_provider,
-            message_stream_factory);
+    KineticConnectionFactory kinetic_connection_factory = kinetic::NewKineticConnectionFactory();
 
-    kinetic::KineticConnection* kinetic_connection;
-    if(!kinetic_connection_factory.NewConnection(options, &kinetic_connection).ok()) {
+    kinetic::BlockingKineticConnection* kinetic_connection;
+    if(!kinetic_connection_factory.NewBlockingConnection(options, &kinetic_connection).ok()) {
         printf("Unable to connect\n");
         return 1;
     }
 
 
-    std::string value;
-    if(!kinetic_connection->Get(kinetic_key, &value, NULL, NULL).ok()) {
+    KineticRecord* record;
+    if(!kinetic_connection->Get(kinetic_key, &record).ok()) {
         printf("Unable to get metadata\n");
         return 1;
     }
 
-    unsigned int file_size = std::stoi(value);
+    unsigned int file_size = std::stoi(record->value());
+    delete record;
     printf("Deleting file of size %d\n", file_size);
 
 

@@ -39,26 +39,23 @@ int main(int argc, char* argv[]) {
     options.user_id = 1;
     options.hmac_key = "asdfasdf";
 
-    HmacProvider hmac_provider;
-    ValueFactory value_factory;
-    MessageStreamFactory message_stream_factory(NULL, value_factory);
-    kinetic::KineticConnectionFactory kinetic_connection_factory(hmac_provider,
-            message_stream_factory);
+    KineticConnectionFactory kinetic_connection_factory = kinetic::NewKineticConnectionFactory();
 
-    kinetic::KineticConnection* kinetic_connection;
-    if(!kinetic_connection_factory.NewConnection(options, &kinetic_connection).ok()) {
+    kinetic::BlockingKineticConnection* kinetic_connection;
+    if(!kinetic_connection_factory.NewBlockingConnection(options, &kinetic_connection).ok()) {
         printf("Unable to connect\n");
         return 1;
     }
 
 
-    std::string value;
-    if(!kinetic_connection->Get(kinetic_key, &value, NULL, NULL).ok()) {
+    KineticRecord* record;
+    if(!kinetic_connection->Get(kinetic_key, &record).ok()) {
         printf("Unable to get metadata\n");
         return 1;
     }
 
-    ssize_t file_size = std::stoll(value);
+    ssize_t file_size = std::stoll(record->value());
+    delete record;
     printf("Reading file of size %zd\n", file_size);
 
     int file = open(output_file_name, O_RDWR | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);
@@ -82,15 +79,16 @@ int main(int argc, char* argv[]) {
             block_length = file_size - i;
         }
 
-        std::string value;
         sprintf(key_buffer, "%s-%10" PRId64, kinetic_key, i);
         std::string key(key_buffer);
 
-        if(!kinetic_connection->Get(key, &value, NULL, NULL).ok()) {
+        KineticRecord* record;
+        if(!kinetic_connection->Get(key, &record).ok()) {
             printf("Unable to get chunk\n");
             return 1;
         }
-        value.copy(output_buffer + i, block_length);
+        delete record;
+        record->value().copy(output_buffer + i, block_length);
         printf(".");
         fflush(stdout);
     }

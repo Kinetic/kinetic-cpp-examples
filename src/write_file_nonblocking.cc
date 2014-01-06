@@ -59,11 +59,7 @@ int main(int argc, char* argv[]) {
     options.user_id = 1;
     options.hmac_key = "asdfasdf";
 
-    HmacProvider hmac_provider;
-    ValueFactory value_factory;
-    MessageStreamFactory message_stream_factory(NULL, value_factory);
-    kinetic::KineticConnectionFactory kinetic_connection_factory(hmac_provider,
-            message_stream_factory);
+    KineticConnectionFactory kinetic_connection_factory = kinetic::NewKineticConnectionFactory();
 
     kinetic::NonblockingKineticConnection* connection;
     if (!kinetic_connection_factory.NewNonblockingConnection(options, &connection).ok()) {

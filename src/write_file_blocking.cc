@@ -39,14 +39,10 @@ int main(int argc, char* argv[]) {
     options.user_id = 1;
     options.hmac_key = "asdfasdf";
 
-    HmacProvider hmac_provider;
-    ValueFactory value_factory;
-    MessageStreamFactory message_stream_factory(NULL, value_factory);
-    kinetic::KineticConnectionFactory kinetic_connection_factory(hmac_provider,
-            message_stream_factory);
+    KineticConnectionFactory kinetic_connection_factory = kinetic::NewKineticConnectionFactory();
 
-    kinetic::KineticConnection* kinetic_connection;
-    if (!kinetic_connection_factory.NewConnection(options, &kinetic_connection).ok()) {
+    kinetic::BlockingKineticConnection* kinetic_connection;
+    if (!kinetic_connection_factory.NewBlockingConnection(options, &kinetic_connection).ok()) {
         printf("Unable to connect\n");
         return 1;
     }
@@ -66,7 +62,10 @@ int main(int argc, char* argv[]) {
 
         std::string key(key_buffer);
         std::string value(inputfile_data + i, value_size);
-        if(!kinetic_connection->Put(key, "",
+        if(!kinetic_connection->Put(
+                key,
+                "",
+                true,
                 KineticRecord(value, "", "", Message_Algorithm_SHA1)).ok()) {
             printf("Unable to write a chunk\n");
             return 1;
@@ -77,7 +76,11 @@ int main(int argc, char* argv[]) {
     printf("\n");
 
 
-    if (!kinetic_connection->Put(kinetic_key, "", KineticRecord(std::to_string(inputfile_stat.st_size), "", "", Message_Algorithm_SHA1)).ok()) {
+    if (!kinetic_connection->Put(
+            kinetic_key,
+            "",
+            true,
+            KineticRecord(std::to_string(inputfile_stat.st_size), "", "", Message_Algorithm_SHA1)).ok()) {
         printf("Unable to write metadata\n");
         return 1;
     }
