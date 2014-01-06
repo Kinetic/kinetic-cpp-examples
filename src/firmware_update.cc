@@ -38,8 +38,8 @@ int main(int argc, char* argv[]) {
 
     kinetic::KineticConnectionFactory kinetic_connection_factory = kinetic::NewKineticConnectionFactory();
 
-    kinetic::KineticConnection* kinetic_connection;
-    if (!kinetic_connection_factory.NewConnection(options, &kinetic_connection).ok()) {
+    kinetic::BlockingKineticConnection* kinetic_connection;
+    if (!kinetic_connection_factory.NewBlockingConnection(options, &kinetic_connection).ok()) {
         printf("Unable to connect\n");
         return 1;
     }
@@ -53,7 +53,7 @@ int main(int argc, char* argv[]) {
         contents << in.rdbuf();
     }
 
-    if (!kinetic_connection->FirmwareUpdate(contents.str()).ok()) {
+    if (!kinetic_connection->UpdateFirmware(contents.str()).ok()) {
         printf("Unable to send firmware\n");
         return 1;
     }
