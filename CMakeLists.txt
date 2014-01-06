@@ -60,7 +60,7 @@ endmacro(add_example_target)
 
 #add_example_target(kineticstat)
 #add_example_target(async)
-#add_example_target(ise)
+add_example_target(ise)
 #add_example_target(setclusterversion)
 #add_example_target(setpin)
 #add_example_target(set_acls)
