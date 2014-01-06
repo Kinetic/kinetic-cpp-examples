@@ -71,9 +71,10 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    unsigned int file_size = std::stoi(record->value());
+
+    long long file_size = std::stoll(record->value());
     delete record;
-    printf("Deleting file of size %d\n", file_size);
+    printf("Deleting file of size %llu\n", file_size);
 
 
     delete kinetic_connection;
@@ -83,13 +84,13 @@ int main(int argc, char* argv[]) {
 
     char key_buffer[100];
     int remaining = 0;
-    for (unsigned int i = 0; i < file_size; i += 1024*1024) {
+    for (int64_t i = 0; i < file_size; i += 1024*1024) {
         unsigned int block_length = 1024*1024;
         if (i + block_length > file_size) {
             block_length = file_size - i + 1;
         }
 
-        sprintf(key_buffer, "%s-%10d", kinetic_key, i);
+        sprintf(key_buffer, "%s-%10" PRId64, kinetic_key, i);
         remaining++;
         DeleteCallback* callback = new DeleteCallback(&remaining);
         std::string key(key_buffer);
