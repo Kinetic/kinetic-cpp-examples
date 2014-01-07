@@ -36,8 +36,8 @@ int main(int argc, char* argv[]) {
 
     kinetic::KineticConnectionFactory kinetic_connection_factory = kinetic::NewKineticConnectionFactory();
 
-    kinetic::BlockingKineticConnection* kinetic_connection;
-    if (!kinetic_connection_factory.NewBlockingConnection(options, &kinetic_connection).ok()) {
+    kinetic::ConnectionHandle* connection;
+    if (!kinetic_connection_factory.NewConnection(options, &connection).ok()) {
         printf("Unable to connect\n");
         return 1;
     }
@@ -45,10 +45,10 @@ int main(int argc, char* argv[]) {
     bool success;
 
     if (argc == 4) {
-        success = kinetic_connection->SetPin(argv[3]).ok();
+        success = connection->blocking().SetPin(argv[3]).ok();
     } else {
         const std::string pin(argv[3]);
-        success = kinetic_connection->SetPin(argv[4], &pin).ok();
+        success = connection->blocking().SetPin(argv[4], &pin).ok();
     }
 
     if (success) {

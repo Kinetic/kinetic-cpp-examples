@@ -58,15 +58,15 @@ int main(int argc, char* argv[]) {
 
     KineticConnectionFactory kinetic_connection_factory = kinetic::NewKineticConnectionFactory();
 
-    kinetic::BlockingKineticConnection* kinetic_connection;
-    if(!kinetic_connection_factory.NewBlockingConnection(options, &kinetic_connection).ok()) {
+    kinetic::ConnectionHandle* connection;
+    if(!kinetic_connection_factory.NewConnection(options, &connection).ok()) {
         printf("Unable to connect\n");
         return 1;
     }
 
 
     KineticRecord* record;
-    if(!kinetic_connection->Get(kinetic_key, &record).ok()) {
+    if(!connection->blocking().Get(kinetic_key, &record).ok()) {
         printf("Unable to get metadata\n");
         return 1;
     }
@@ -75,12 +75,6 @@ int main(int argc, char* argv[]) {
     long long file_size = std::stoll(record->value());
     delete record;
     printf("Deleting file of size %llu\n", file_size);
-
-
-    delete kinetic_connection;
-
-    kinetic::NonblockingKineticConnection* connection;
-    kinetic_connection_factory.NewNonblockingConnection(options, &connection);
 
     char key_buffer[100];
     int remaining = 0;
@@ -94,18 +88,18 @@ int main(int argc, char* argv[]) {
         remaining++;
         DeleteCallback* callback = new DeleteCallback(&remaining);
         std::string key(key_buffer);
-        connection->Delete(key, "", true, callback);
+        connection->nonblocking().Delete(key, "", true, callback);
     }
 
     remaining++;
-    connection->Delete(kinetic_key, "", true, new DeleteCallback(&remaining));
+    connection->nonblocking().Delete(kinetic_key, "", true, new DeleteCallback(&remaining));
 
 
     fd_set read_fds, write_fds;
     int num_fds = 0;
-    connection->Run(&read_fds, &write_fds, &num_fds);
+    connection->nonblocking().Run(&read_fds, &write_fds, &num_fds);
     while (remaining > 0) {
-        connection->Run(&read_fds, &write_fds, &num_fds);
+        connection->nonblocking().Run(&read_fds, &write_fds, &num_fds);
     }
 
     printf("\nDone!\n");

@@ -71,15 +71,15 @@ int main(int argc, char* argv[]) {
 
     KineticConnectionFactory kinetic_connection_factory = kinetic::NewKineticConnectionFactory();
 
-    kinetic::BlockingKineticConnection* kinetic_connection;
-    if(!kinetic_connection_factory.NewBlockingConnection(options, &kinetic_connection).ok()) {
+    kinetic::ConnectionHandle* connection;
+    if(!kinetic_connection_factory.NewConnection(options, &connection).ok()) {
         printf("Unable to connect\n");
         return 1;
     }
 
 
     KineticRecord* record;
-    if(!kinetic_connection->Get(kinetic_key, &record).ok()) {
+    if(!connection->blocking().Get(kinetic_key, &record).ok()) {
         printf("Unable to get metadata\n");
         return 1;
     }
@@ -88,11 +88,6 @@ int main(int argc, char* argv[]) {
     delete record;
     printf("Reading file of size %llu\n", file_size);
 
-
-    delete kinetic_connection;
-
-    kinetic::NonblockingKineticConnection* connection;
-    kinetic_connection_factory.NewNonblockingConnection(options, &connection);
 
     int file = open(output_file_name, O_RDWR | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);
     if(!file) {
@@ -122,14 +117,14 @@ int main(int argc, char* argv[]) {
         remaining++;
         TestCallback* callback = new TestCallback(output_buffer + i, block_length, &remaining);
         std::string key(key_buffer);
-        connection->Get(key, callback);
-        connection->Run(&read_fds, &write_fds, &num_fds);
+        connection->nonblocking().Get(key, callback);
+        connection->nonblocking().Run(&read_fds, &write_fds, &num_fds);
     }
 
-    connection->Run(&read_fds, &write_fds, &num_fds);
+    connection->nonblocking().Run(&read_fds, &write_fds, &num_fds);
     while (remaining > 0) {
         while(select(num_fds + 1, &read_fds, &write_fds, NULL, NULL) <= 0);
-        connection->Run(&read_fds, &write_fds, &num_fds);
+        connection->nonblocking().Run(&read_fds, &write_fds, &num_fds);
     }
 
     CHECK(!close(file));

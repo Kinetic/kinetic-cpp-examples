@@ -40,15 +40,15 @@ int main(int argc, char* argv[]) {
 
     KineticConnectionFactory kinetic_connection_factory = kinetic::NewKineticConnectionFactory();
 
-    kinetic::BlockingKineticConnection* kinetic_connection;
-    if(!kinetic_connection_factory.NewBlockingConnection(options, &kinetic_connection).ok()) {
+    kinetic::ConnectionHandle* connection;
+    if(!kinetic_connection_factory.NewConnection(options, &connection).ok()) {
         printf("Unable to connect\n");
         return 1;
     }
 
 
     KineticRecord* record;
-    if(!kinetic_connection->Get(kinetic_key, &record).ok()) {
+    if(!connection->blocking().Get(kinetic_key, &record).ok()) {
         printf("Unable to get metadata\n");
         return 1;
     }
@@ -82,7 +82,7 @@ int main(int argc, char* argv[]) {
         std::string key(key_buffer);
 
         KineticRecord* record;
-        if(!kinetic_connection->Get(key, &record).ok()) {
+        if(!connection->blocking().Get(key, &record).ok()) {
             printf("Unable to get chunk\n");
             return 1;
         }

@@ -37,8 +37,8 @@ int main(int argc, char* argv[]) {
 
     kinetic::KineticConnectionFactory kinetic_connection_factory = kinetic::NewKineticConnectionFactory();
 
-    kinetic::BlockingKineticConnection* kinetic_connection;
-    if (!kinetic_connection_factory.NewBlockingConnection(options, &kinetic_connection).ok()) {
+    kinetic::ConnectionHandle* connection;
+    if (!kinetic_connection_factory.NewConnection(options, &connection).ok()) {
         printf("Unable to connect\n");
         return 1;
     }
@@ -76,7 +76,7 @@ int main(int argc, char* argv[]) {
 
     printf("Setting ACLs...");
 
-    if (kinetic_connection->SetACLs(acls).ok()) {
+    if (connection->blocking().SetACLs(acls).ok()) {
         printf("Success!\n");
         return 0;
     } else {

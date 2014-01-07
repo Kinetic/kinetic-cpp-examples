@@ -40,8 +40,8 @@ int main(int argc, char* argv[]) {
 
     KineticConnectionFactory kinetic_connection_factory = kinetic::NewKineticConnectionFactory();
 
-    kinetic::BlockingKineticConnection* kinetic_connection;
-    if (!kinetic_connection_factory.NewBlockingConnection(options, &kinetic_connection).ok()) {
+    kinetic::ConnectionHandle* connection;
+    if (!kinetic_connection_factory.NewConnection(options, &connection).ok()) {
         printf("Unable to connect\n");
         return 1;
     }
@@ -61,7 +61,7 @@ int main(int argc, char* argv[]) {
 
         std::string key(key_buffer);
         std::string value(inputfile_data + i, value_size);
-        if(!kinetic_connection->Put(
+        if(!connection->blocking().Put(
                 key,
                 "",
                 true,
@@ -75,7 +75,7 @@ int main(int argc, char* argv[]) {
     printf("\n");
 
 
-    if (!kinetic_connection->Put(
+    if (!connection->blocking().Put(
             kinetic_key,
             "",
             true,

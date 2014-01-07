@@ -38,13 +38,13 @@ int main(int argc, char* argv[]) {
 
     kinetic::KineticConnectionFactory kinetic_connection_factory = kinetic::NewKineticConnectionFactory();
 
-    kinetic::BlockingKineticConnection* kinetic_connection;
-    if (!kinetic_connection_factory.NewBlockingConnection(options, &kinetic_connection).ok()) {
+    kinetic::ConnectionHandle* connection;
+    if (!kinetic_connection_factory.NewConnection(options, &connection).ok()) {
         printf("Unable to connect\n");
         return 1;
     }
 
-    if (!(kinetic_connection->SetClusterVersion(new_cluster_version).ok())) {
+    if (!(connection->blocking().SetClusterVersion(new_cluster_version).ok())) {
         printf("Unable to set cluster version\n");
         return 1;
     }

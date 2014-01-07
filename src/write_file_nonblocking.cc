@@ -60,8 +60,8 @@ int main(int argc, char* argv[]) {
 
     KineticConnectionFactory kinetic_connection_factory = kinetic::NewKineticConnectionFactory();
 
-    kinetic::NonblockingKineticConnection* connection;
-    if (!kinetic_connection_factory.NewNonblockingConnection(options, &connection).ok()) {
+    kinetic::ConnectionHandle* connection;
+    if (!kinetic_connection_factory.NewConnection(options, &connection).ok()) {
         printf("Unable to connect\n");
         return 1;
     }
@@ -87,19 +87,19 @@ int main(int argc, char* argv[]) {
 
         KineticRecord record(value, "", "", Message_Algorithm_SHA1);
         remaining++;
-        connection->Put(key, "", true, record, new PutCallback(&remaining));
-        connection->Run(&read_fds, &write_fds, &num_fds);
+        connection->nonblocking().Put(key, "", true, record, new PutCallback(&remaining));
+        connection->nonblocking().Run(&read_fds, &write_fds, &num_fds);
 
     }
 
     KineticRecord record(std::to_string(inputfile_stat.st_size), "", "", Message_Algorithm_SHA1);
     remaining++;
-    connection->Put(kinetic_key, "", true, record, new PutCallback(&remaining));
+    connection->nonblocking().Put(kinetic_key, "", true, record, new PutCallback(&remaining));
 
-    connection->Run(&read_fds, &write_fds, &num_fds);
+    connection->nonblocking().Run(&read_fds, &write_fds, &num_fds);
     while (remaining > 0) {
         while (select(num_fds + 1, &read_fds, &write_fds, NULL, NULL) <= 0);
-        connection->Run(&read_fds, &write_fds, &num_fds);
+        connection->nonblocking().Run(&read_fds, &write_fds, &num_fds);
     }
 
     if (close(file)) {

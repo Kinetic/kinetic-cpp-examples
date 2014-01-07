@@ -41,8 +41,8 @@ int main(int argc, char* argv[]) {
 
     kinetic::KineticConnectionFactory kinetic_connection_factory = kinetic::NewKineticConnectionFactory();
 
-    kinetic::BlockingKineticConnection* kinetic_connection;
-    if(!kinetic_connection_factory.NewBlockingConnection(options, &kinetic_connection).ok()) {
+    kinetic::ConnectionHandle* connection;
+    if(!kinetic_connection_factory.NewConnection(options, &connection).ok()) {
         printf("Unable to connect\n");
         return 1;
     }
@@ -50,7 +50,7 @@ int main(int argc, char* argv[]) {
     if (argc == 2) {
         // User just specified host so dump everything
         DriveLog drive_log;
-        if(!kinetic_connection->GetLog(&drive_log).ok()) {
+        if(!connection->blocking().GetLog(&drive_log).ok()) {
             printf("Unable to get log\n");
             return 1;
         }
@@ -64,7 +64,7 @@ int main(int argc, char* argv[]) {
         int report_number = 0;
         while (true) {
             DriveLog drive_log;
-            if(!kinetic_connection->GetLog(&drive_log).ok()) {
+            if(!connection->blocking().GetLog(&drive_log).ok()) {
                 printf("Unable to get log\n");
                 return 1;
             }

@@ -36,8 +36,8 @@ int main(int argc, char* argv[]) {
 
     kinetic::KineticConnectionFactory kinetic_connection_factory = kinetic::NewKineticConnectionFactory();
 
-    kinetic::BlockingKineticConnection* kinetic_connection;
-    if (!kinetic_connection_factory.NewBlockingConnection(options, &kinetic_connection).ok()) {
+    kinetic::ConnectionHandle* connection;
+    if (!kinetic_connection_factory.NewConnection(options, &connection).ok()) {
         printf("Unable to connect\n");
         return 1;
     }
@@ -51,7 +51,7 @@ int main(int argc, char* argv[]) {
         printf("Performing ISE on %s:%d with pin %s\n", host, port, argv[3]);
     }
 
-    bool success = kinetic_connection->InstantSecureErase(pin).ok();
+    bool success = connection->blocking().InstantSecureErase(pin).ok();
 
     if (pin) {
         delete pin;
