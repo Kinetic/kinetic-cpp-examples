@@ -22,6 +22,7 @@ using kinetic::KineticRecord;
 using palominolabs::protobufutil::MessageStreamFactory;
 
 int main(int argc, char* argv[]) {
+    google::InitGoogleLogging(argv[0]);
 
     if (argc != 4) {
         printf("%s: <host> <kinetic key> <output file name>\n", argv[0]);
@@ -86,8 +87,10 @@ int main(int argc, char* argv[]) {
             printf("Unable to get chunk\n");
             return 1;
         }
-        delete record;
+        
         record->value().copy(output_buffer + i, block_length);
+        delete record;
+        
         printf(".");
         fflush(stdout);
     }
@@ -100,6 +103,12 @@ int main(int argc, char* argv[]) {
 
 
     printf("Done!\n");
+
+    delete connection;
+
+    google::protobuf::ShutdownProtobufLibrary();
+    google::ShutdownGoogleLogging();
+    google::ShutDownCommandLineFlags();
 
     return 0;
 }
