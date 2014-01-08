@@ -4,6 +4,7 @@
 #include <glog/logging.h>
 #include <sys/fcntl.h>
 #include <sys/mman.h>
+#include <memory>
 
 #include "protobufutil/message_stream.h"
 
@@ -32,7 +33,7 @@ using kinetic::SocketWrapper;
 class TestCallback : public GetCallbackInterface {
 public:
     TestCallback(char* buffer, unsigned int expected_length, int* remaining) : buffer_(buffer), expected_length_(expected_length), remaining_(remaining) {};
-    void Success(const std::string &key, KineticRecord* record) {
+    void Success(const std::string &key, std::unique_ptr<KineticRecord> record) {
         if(expected_length_ != record->value().size()) {
             printf("Received value chunk of wrong size\n");
             exit(1);
