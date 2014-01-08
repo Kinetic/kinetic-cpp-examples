@@ -1,7 +1,6 @@
 // This deletes a file written using write_file_(non)blocking
 
 #include <stdio.h>
-#include <glog/logging.h>
 
 #include "protobufutil/message_stream.h"
 
