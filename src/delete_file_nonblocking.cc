@@ -41,6 +41,7 @@ private:
 };
 
 int main(int argc, char* argv[]) {
+    google::InitGoogleLogging(argv[0]);
 
     if (argc != 3) {
         printf("%s: <host> <kinetic key>\n", argv[0]);
@@ -64,13 +65,11 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-
     KineticRecord* record;
     if(!connection->blocking().Get(kinetic_key, &record).ok()) {
         printf("Unable to get metadata\n");
         return 1;
     }
-
 
     long long file_size = std::stoll(record->value());
     delete record;
@@ -78,6 +77,7 @@ int main(int argc, char* argv[]) {
 
     char key_buffer[100];
     int remaining = 0;
+    DeleteCallback callback(&remaining);
     for (int64_t i = 0; i < file_size; i += 1024*1024) {
         unsigned int block_length = 1024*1024;
         if (i + block_length > file_size) {
@@ -86,13 +86,12 @@ int main(int argc, char* argv[]) {
 
         sprintf(key_buffer, "%s-%10" PRId64, kinetic_key, i);
         remaining++;
-        DeleteCallback* callback = new DeleteCallback(&remaining);
         std::string key(key_buffer);
-        connection->nonblocking().Delete(key, "", true, callback);
+        connection->nonblocking().Delete(key, "", true, &callback);
     }
 
     remaining++;
-    connection->nonblocking().Delete(kinetic_key, "", true, new DeleteCallback(&remaining));
+    connection->nonblocking().Delete(kinetic_key, "", true, &callback);
 
 
     fd_set read_fds, write_fds;
@@ -105,6 +104,9 @@ int main(int argc, char* argv[]) {
     printf("\nDone!\n");
 
     delete connection;
+    google::protobuf::ShutdownProtobufLibrary();
+    google::ShutdownGoogleLogging();
+    google::ShutDownCommandLineFlags();
 
     return 0;
 }
