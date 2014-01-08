@@ -12,7 +12,7 @@ include(ExternalProject)
 option(USE_LOCAL_KINETIC_CLIENT "Uses the kinetic client at the KINETIC_CLIENT_PATH variable instead of downloading library from Git" off)
 if(USE_LOCAL_KINETIC_CLIENT)
 else(USE_LOCAL_KINETIC_CLIENT)
-    set(KINETIC_CLIENT_PATH "")
+    set(KINETIC_CLIENT_PATH ".")
 
     ExternalProject_add(
         kinetic_cpp_client
