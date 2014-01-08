@@ -1,7 +1,6 @@
 // This deletes a file written using write_file_(non)blocking
 
 #include <stdio.h>
-#include <glog/logging.h>
 
 #include "protobufutil/message_stream.h"
 
@@ -15,7 +14,6 @@ using com::seagate::kinetic::proto::Message;
 using com::seagate::kinetic::proto::Message_MessageType_GET;
 using com::seagate::kinetic::proto::Message_Algorithm_SHA1;
 using com::seagate::kinetic::ValueFactory;
-using kinetic::KineticConnection;
 using kinetic::KineticConnectionFactory;
 using kinetic::KineticRecord;
 using kinetic::NonblockingError;
@@ -42,6 +40,7 @@ private:
 };
 
 int main(int argc, char* argv[]) {
+    google::InitGoogleLogging(argv[0]);
 
     if (argc != 3) {
         printf("%s: <host> <kinetic key>\n", argv[0]);
@@ -57,63 +56,56 @@ int main(int argc, char* argv[]) {
     options.user_id = 1;
     options.hmac_key = "asdfasdf";
 
-    HmacProvider hmac_provider;
-    ValueFactory value_factory;
-    MessageStreamFactory message_stream_factory(NULL, value_factory);
-    kinetic::KineticConnectionFactory kinetic_connection_factory(hmac_provider,
-            message_stream_factory);
+    KineticConnectionFactory kinetic_connection_factory = kinetic::NewKineticConnectionFactory();
 
-    kinetic::KineticConnection* kinetic_connection;
-    if(!kinetic_connection_factory.NewConnection(options, &kinetic_connection).ok()) {
+    kinetic::ConnectionHandle* connection;
+    if(!kinetic_connection_factory.NewConnection(options, &connection).ok()) {
         printf("Unable to connect\n");
         return 1;
     }
 
-
-    std::string value;
-    if(!kinetic_connection->Get(kinetic_key, &value, NULL, NULL).ok()) {
+    KineticRecord* record;
+    if(!connection->blocking().Get(kinetic_key, &record).ok()) {
         printf("Unable to get metadata\n");
         return 1;
     }
 
-    unsigned int file_size = std::stoi(value);
-    printf("Deleting file of size %d\n", file_size);
-
-
-    delete kinetic_connection;
-
-    kinetic::NonblockingKineticConnection* connection;
-    kinetic_connection_factory.NewNonblockingConnection(options, &connection);
+    long long file_size = std::stoll(record->value());
+    delete record;
+    printf("Deleting file of size %llu\n", file_size);
 
     char key_buffer[100];
     int remaining = 0;
-    for (unsigned int i = 0; i < file_size; i += 1024*1024) {
+    DeleteCallback callback(&remaining);
+    for (int64_t i = 0; i < file_size; i += 1024*1024) {
         unsigned int block_length = 1024*1024;
         if (i + block_length > file_size) {
             block_length = file_size - i + 1;
         }
 
-        sprintf(key_buffer, "%s-%10d", kinetic_key, i);
+        sprintf(key_buffer, "%s-%10" PRId64, kinetic_key, i);
         remaining++;
-        DeleteCallback* callback = new DeleteCallback(&remaining);
         std::string key(key_buffer);
-        connection->Delete(key, "", true, callback);
+        connection->nonblocking().Delete(key, "", true, &callback);
     }
 
     remaining++;
-    connection->Delete(kinetic_key, "", true, new DeleteCallback(&remaining));
+    connection->nonblocking().Delete(kinetic_key, "", true, &callback);
 
 
     fd_set read_fds, write_fds;
     int num_fds = 0;
-    connection->Run(&read_fds, &write_fds, &num_fds);
+    connection->nonblocking().Run(&read_fds, &write_fds, &num_fds);
     while (remaining > 0) {
-        connection->Run(&read_fds, &write_fds, &num_fds);
+        connection->nonblocking().Run(&read_fds, &write_fds, &num_fds);
     }
 
     printf("\nDone!\n");
 
     delete connection;
+    google::protobuf::ShutdownProtobufLibrary();
+    google::ShutdownGoogleLogging();
+    google::ShutDownCommandLineFlags();
 
     return 0;
 }

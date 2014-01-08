@@ -14,7 +14,6 @@ using com::seagate::kinetic::proto::Message;
 using com::seagate::kinetic::proto::Message_MessageType_GET;
 using com::seagate::kinetic::proto::Message_Algorithm_SHA1;
 using com::seagate::kinetic::ValueFactory;
-using kinetic::KineticConnection;
 using kinetic::KineticConnectionFactory;
 using kinetic::Status;
 using kinetic::KineticRecord;
@@ -36,14 +35,10 @@ int main(int argc, char* argv[]) {
     options.user_id = 1;
     options.hmac_key = "asdfasdf";
 
-    HmacProvider hmac_provider;
-    ValueFactory value_factory;
-    MessageStreamFactory message_stream_factory(NULL, value_factory);
-    kinetic::KineticConnectionFactory kinetic_connection_factory(hmac_provider,
-            message_stream_factory);
+    kinetic::KineticConnectionFactory kinetic_connection_factory = kinetic::NewKineticConnectionFactory();
 
-    kinetic::KineticConnection* kinetic_connection;
-    if (!kinetic_connection_factory.NewConnection(options, &kinetic_connection).ok()) {
+    kinetic::ConnectionHandle* connection;
+    if (!kinetic_connection_factory.NewConnection(options, &connection).ok()) {
         printf("Unable to connect\n");
         return 1;
     }
@@ -57,7 +52,7 @@ int main(int argc, char* argv[]) {
         contents << in.rdbuf();
     }
 
-    if (!kinetic_connection->FirmwareUpdate(contents.str()).ok()) {
+    if (!connection->blocking().UpdateFirmware(contents.str()).ok()) {
         printf("Unable to send firmware\n");
         return 1;
     }

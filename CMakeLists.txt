@@ -8,32 +8,39 @@ set(CMAKE_CXX_FLAGS "-g --std=c++11 -Wall -Wextra -Werror -Wno-unknown-warning-o
 set(GENERATED_SOURCES_PATH ${kinetic_cpp_client_SOURCE_DIR}/src/main/generated)
 
 include(ExternalProject)
-ExternalProject_add(
-    kinetic_cpp_client
-    PREFIX "vendor"
-    GIT_REPOSITORY "git@github.com:Seagate/Kinetic-C-Client.git"
-    GIT_TAG "c9c578e88f76b4cffdd09ba49a334a7c84b8e8e6"
-    BUILD_IN_SOURCE 1
-    INSTALL_COMMAND ""
-)
+
+option(USE_LOCAL_KINETIC_CLIENT "Uses the kinetic client at the KINETIC_CLIENT_PATH variable instead of downloading library from Git" off)
+if(USE_LOCAL_KINETIC_CLIENT)
+else(USE_LOCAL_KINETIC_CLIENT)
+    set(KINETIC_CLIENT_PATH "${kinetic_cpp_client_examples_SOURCE_DIR}/vendor/src/kinetic_cpp_client")
+
+    ExternalProject_add(
+        kinetic_cpp_client
+        PREFIX "vendor"
+        GIT_REPOSITORY "git@github.com:Seagate/Kinetic-C-Client.git"
+        GIT_TAG "7046918130914d97036e1aaf708fffa9f89ddbe0"
+        BUILD_IN_SOURCE 1
+        INSTALL_COMMAND ""
+    )
+endif(USE_LOCAL_KINETIC_CLIENT)
 
 include_directories(
-    vendor/src/kinetic_cpp_client/vendor/src/protobufutil/vendor/include
-    vendor/src/kinetic_cpp_client/vendor/src/protobufutil/include
-    vendor/src/kinetic_cpp_client/vendor/src/protobufutil/vendor/src/gmock/fused-src
-    vendor/src/kinetic_cpp_client/src/main
-    vendor/src/kinetic_cpp_client/src/main/generated
-    vendor/src/kinetic_cpp_client/include
+    ${KINETIC_CLIENT_PATH}/vendor/src/protobufutil/vendor/include
+    ${KINETIC_CLIENT_PATH}/vendor/src/protobufutil/include
+    ${KINETIC_CLIENT_PATH}/vendor/src/protobufutil/vendor/src/gmock/fused-src
+    ${KINETIC_CLIENT_PATH}/src/main
+    ${KINETIC_CLIENT_PATH}/src/main/generated
+    ${KINETIC_CLIENT_PATH}/include
 )
 
 set(LIBRARY_DEPENDENCIES
-    ${kinetic_cpp_client_examples_SOURCE_DIR}/vendor/src/kinetic_cpp_client/libkinetic_client.a
-    ${kinetic_cpp_client_examples_SOURCE_DIR}/vendor/src/kinetic_cpp_client/vendor/src/protobufutil/libprotobufutil.a
-    ${kinetic_cpp_client_examples_SOURCE_DIR}/vendor/src/kinetic_cpp_client/vendor/src/protobufutil/vendor/lib/libglog.a
-    ${kinetic_cpp_client_examples_SOURCE_DIR}/vendor/src/kinetic_cpp_client/vendor/src/protobufutil/vendor/lib/libgflags.a
-    ${kinetic_cpp_client_examples_SOURCE_DIR}/vendor/src/kinetic_cpp_client/vendor/src/protobufutil/vendor/lib/libssl.a
-    ${kinetic_cpp_client_examples_SOURCE_DIR}/vendor/src/kinetic_cpp_client/vendor/src/protobufutil/vendor/lib/libcrypto.a
-    ${kinetic_cpp_client_examples_SOURCE_DIR}/vendor/src/kinetic_cpp_client/vendor/src/protobufutil/vendor/lib/libprotobuf.a
+    ${KINETIC_CLIENT_PATH}/libkinetic_client.a
+    ${KINETIC_CLIENT_PATH}/vendor/src/protobufutil/libprotobufutil.a
+    ${KINETIC_CLIENT_PATH}/vendor/src/protobufutil/vendor/lib/libglog.a
+    ${KINETIC_CLIENT_PATH}/vendor/src/protobufutil/vendor/lib/libgflags.a
+    ${KINETIC_CLIENT_PATH}/vendor/src/protobufutil/vendor/lib/libssl.a
+    ${KINETIC_CLIENT_PATH}/vendor/src/protobufutil/vendor/lib/libcrypto.a
+    ${KINETIC_CLIENT_PATH}/vendor/src/protobufutil/vendor/lib/libprotobuf.a
     ${CMAKE_THREAD_LIBS_INIT}
     dl
 )
@@ -52,7 +59,6 @@ macro(add_example_target NAME)
 endmacro(add_example_target)
 
 add_example_target(kineticstat)
-add_example_target(async)
 add_example_target(ise)
 add_example_target(setclusterversion)
 add_example_target(setpin)
