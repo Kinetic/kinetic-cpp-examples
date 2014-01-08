@@ -22,6 +22,7 @@ using kinetic::KineticRecord;
 using palominolabs::protobufutil::MessageStreamFactory;
 
 int main(int argc, char* argv[]) {
+    google::InitGoogleLogging(argv[0]);
 
     if (argc != 4) {
         printf("Usage: %s <host> <kinetic key> <input file name>\n", argv[0]);
@@ -89,7 +90,13 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
+    delete connection;
+
     printf("Done!\n");
+
+    google::protobuf::ShutdownProtobufLibrary();
+    google::ShutdownGoogleLogging();
+    google::ShutDownCommandLineFlags();
 
     return 0;
 }
