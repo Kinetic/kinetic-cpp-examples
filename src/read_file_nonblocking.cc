@@ -1,9 +1,9 @@
 // This reads a file stored using write_file_blocking.cc using the nonblocking API
 
 #include <stdio.h>
-#include <glog/logging.h>
 #include <sys/fcntl.h>
 #include <sys/mman.h>
+#include <memory>
 
 #include "protobufutil/message_stream.h"
 
@@ -17,7 +17,6 @@ using com::seagate::kinetic::proto::Message;
 using com::seagate::kinetic::proto::Message_MessageType_GET;
 using com::seagate::kinetic::proto::Message_Algorithm_SHA1;
 using com::seagate::kinetic::ValueFactory;
-using kinetic::KineticConnection;
 using kinetic::KineticConnectionFactory;
 using kinetic::Status;
 using kinetic::KineticRecord;
@@ -30,16 +29,15 @@ using kinetic::Message;
 using kinetic::NonblockingKineticConnection;
 using kinetic::SocketWrapper;
 
-class TestCallback : public GetCallbackInterface {
+class Callback : public GetCallbackInterface {
 public:
-    TestCallback(char* buffer, unsigned int expected_length, int* remaining) : buffer_(buffer), expected_length_(expected_length), remaining_(remaining) {};
-    void Success(const std::string &key, const std::string &value,
-            const std::string &version, const std::string &tag) {
-        if(expected_length_ != value.size()) {
+    Callback(char* buffer, unsigned int expected_length, int* remaining) : buffer_(buffer), expected_length_(expected_length), remaining_(remaining) {};
+    void Success(const std::string &key, std::unique_ptr<KineticRecord> record) {
+        if(expected_length_ != record->value().size()) {
             printf("Received value chunk of wrong size\n");
             exit(1);
         }
-        value.copy(buffer_, expected_length_);
+        record->value().copy(buffer_, expected_length_);
         printf(".");
         fflush(stdout);
         (*remaining_)--;
@@ -55,6 +53,7 @@ private:
 };
 
 int main(int argc, char* argv[]) {
+    google::InitGoogleLogging(argv[0]);
 
     if (argc != 4) {
         printf("%s: <host> <kinetic key> <output file name>\n", argv[0]);
@@ -71,33 +70,25 @@ int main(int argc, char* argv[]) {
     options.user_id = 1;
     options.hmac_key = "asdfasdf";
 
-    HmacProvider hmac_provider;
-    ValueFactory value_factory;
-    MessageStreamFactory message_stream_factory(NULL, value_factory);
-    kinetic::KineticConnectionFactory kinetic_connection_factory(hmac_provider,
-            message_stream_factory);
+    KineticConnectionFactory kinetic_connection_factory = kinetic::NewKineticConnectionFactory();
 
-    kinetic::KineticConnection* kinetic_connection;
-    if(!kinetic_connection_factory.NewConnection(options, &kinetic_connection).ok()) {
+    kinetic::ConnectionHandle* connection;
+    if(!kinetic_connection_factory.NewConnection(options, &connection).ok()) {
         printf("Unable to connect\n");
         return 1;
     }
 
 
-    std::string value;
-    if(!kinetic_connection->Get(kinetic_key, &value, NULL, NULL).ok()) {
+    KineticRecord* record;
+    if(!connection->blocking().Get(kinetic_key, &record).ok()) {
         printf("Unable to get metadata\n");
         return 1;
     }
 
-    long long file_size = std::stoll(value);
+    long long file_size = std::stoll(record->value());
+    delete record;
     printf("Reading file of size %llu\n", file_size);
 
-
-    delete kinetic_connection;
-
-    kinetic::NonblockingKineticConnection* connection;
-    kinetic_connection_factory.NewNonblockingConnection(options, &connection);
 
     int file = open(output_file_name, O_RDWR | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);
     if(!file) {
@@ -112,11 +103,17 @@ int main(int argc, char* argv[]) {
         printf("Unable to resize file\n");
         return 1;
     }
+
     char* output_buffer = (char*)mmap(0, file_size, PROT_READ | PROT_WRITE, MAP_SHARED, file, 0);
+    if (output_buffer == MAP_FAILED) {
+        printf("Unable to mmap file errno=%d\n", errno);
+        return 1;
+    }
     char key_buffer[100];
     int remaining = 0;
     fd_set read_fds, write_fds;
     int num_fds = 0;
+    std::vector<std::unique_ptr<Callback> > callbacks;
     for (int64_t i = 0; i < file_size; i += 1024*1024) {
         unsigned int block_length = 1024*1024;
         if (i + block_length > file_size) {
@@ -125,16 +122,16 @@ int main(int argc, char* argv[]) {
 
         sprintf(key_buffer, "%s-%10" PRId64, kinetic_key, i);
         remaining++;
-        TestCallback* callback = new TestCallback(output_buffer + i, block_length, &remaining);
-        std::string key(key_buffer);
-        connection->Get(key, callback);
-        connection->Run(&read_fds, &write_fds, &num_fds);
+        std::unique_ptr<Callback> callback(new Callback(output_buffer + i, block_length, &remaining));
+        connection->nonblocking().Get(std::string(key_buffer), callback.get());
+        connection->nonblocking().Run(&read_fds, &write_fds, &num_fds);
+        callbacks.push_back(std::move(callback));
     }
 
-    connection->Run(&read_fds, &write_fds, &num_fds);
+    connection->nonblocking().Run(&read_fds, &write_fds, &num_fds);
     while (remaining > 0) {
         while(select(num_fds + 1, &read_fds, &write_fds, NULL, NULL) <= 0);
-        connection->Run(&read_fds, &write_fds, &num_fds);
+        connection->nonblocking().Run(&read_fds, &write_fds, &num_fds);
     }
 
     CHECK(!close(file));
@@ -142,6 +139,9 @@ int main(int argc, char* argv[]) {
     printf("\nDone!\n");
 
     delete connection;
+    google::protobuf::ShutdownProtobufLibrary();
+    google::ShutdownGoogleLogging();
+    google::ShutDownCommandLineFlags();
 
     return 0;
 }

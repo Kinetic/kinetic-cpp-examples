@@ -17,7 +17,6 @@ using com::seagate::kinetic::proto::Message;
 using com::seagate::kinetic::proto::Message_MessageType_GET;
 using com::seagate::kinetic::proto::Message_Algorithm_SHA1;
 using com::seagate::kinetic::ValueFactory;
-using kinetic::KineticConnection;
 using kinetic::KineticConnectionFactory;
 using kinetic::Status;
 using kinetic::KineticRecord;
@@ -43,6 +42,7 @@ private:
 
 
 int main(int argc, char* argv[]) {
+    google::InitGoogleLogging(argv[0]);
 
     if (argc != 4) {
         printf("Usage: %s <host> <kinetic key> <input file name>\n", argv[0]);
@@ -59,14 +59,10 @@ int main(int argc, char* argv[]) {
     options.user_id = 1;
     options.hmac_key = "asdfasdf";
 
-    HmacProvider hmac_provider;
-    ValueFactory value_factory;
-    MessageStreamFactory message_stream_factory(NULL, value_factory);
-    kinetic::KineticConnectionFactory kinetic_connection_factory(hmac_provider,
-            message_stream_factory);
+    KineticConnectionFactory kinetic_connection_factory = kinetic::NewKineticConnectionFactory();
 
-    kinetic::NonblockingKineticConnection* connection;
-    if (!kinetic_connection_factory.NewNonblockingConnection(options, &connection).ok()) {
+    kinetic::ConnectionHandle* connection;
+    if (!kinetic_connection_factory.NewConnection(options, &connection).ok()) {
         printf("Unable to connect\n");
         return 1;
     }
@@ -79,6 +75,9 @@ int main(int argc, char* argv[]) {
     int remaining = 0;
     fd_set read_fds, write_fds;
     int num_fds = 0;
+
+    PutCallback callback(&remaining);
+
     for (int64_t i = 0; i < inputfile_stat.st_size; i += 1024*1024) {
         int value_size = 1024*1024;
         if (i + value_size > inputfile_stat.st_size) {
@@ -92,25 +91,31 @@ int main(int argc, char* argv[]) {
 
         KineticRecord record(value, "", "", Message_Algorithm_SHA1);
         remaining++;
-        connection->Put(key, "", true, record, new PutCallback(&remaining));
-        connection->Run(&read_fds, &write_fds, &num_fds);
+        connection->nonblocking().Put(key, "", true, record, &callback);
+        connection->nonblocking().Run(&read_fds, &write_fds, &num_fds);
 
     }
 
     KineticRecord record(std::to_string(inputfile_stat.st_size), "", "", Message_Algorithm_SHA1);
     remaining++;
-    connection->Put(kinetic_key, "", true, record, new PutCallback(&remaining));
 
-    connection->Run(&read_fds, &write_fds, &num_fds);
+    connection->nonblocking().Put(kinetic_key, "", true, record, &callback);
+
+    connection->nonblocking().Run(&read_fds, &write_fds, &num_fds);
     while (remaining > 0) {
         while (select(num_fds + 1, &read_fds, &write_fds, NULL, NULL) <= 0);
-        connection->Run(&read_fds, &write_fds, &num_fds);
+        connection->nonblocking().Run(&read_fds, &write_fds, &num_fds);
     }
 
     if (close(file)) {
         printf("Unable to close file\n");
         return 1;
     }
+
+    delete connection;
+    google::protobuf::ShutdownProtobufLibrary();
+    google::ShutdownGoogleLogging();
+    google::ShutDownCommandLineFlags();
 
     printf("Done!\n");
 

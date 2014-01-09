@@ -13,7 +13,6 @@ using com::seagate::kinetic::proto::Message;
 using com::seagate::kinetic::proto::Message_MessageType_GET;
 using com::seagate::kinetic::proto::Message_Algorithm_SHA1;
 using com::seagate::kinetic::ValueFactory;
-using kinetic::KineticConnection;
 using kinetic::KineticConnectionFactory;
 using kinetic::Status;
 using kinetic::KineticRecord;
@@ -36,28 +35,24 @@ int main(int argc, char* argv[]) {
     options.user_id = 1;
     options.hmac_key = "asdfasdf";
 
-    HmacProvider hmac_provider;
-    ValueFactory value_factory;
-    MessageStreamFactory message_stream_factory(NULL, value_factory);
-    kinetic::KineticConnectionFactory kinetic_connection_factory(hmac_provider,
-            message_stream_factory);
+    kinetic::KineticConnectionFactory kinetic_connection_factory = kinetic::NewKineticConnectionFactory();
 
-    kinetic::KineticConnection* kinetic_connection;
-    if (!kinetic_connection_factory.NewConnection(options, &kinetic_connection).ok()) {
+    kinetic::ConnectionHandle* connection;
+    if (!kinetic_connection_factory.NewConnection(options, &connection).ok()) {
         printf("Unable to connect\n");
         return 1;
     }
 
+    Domain domain1 = {.offset = 0, .value = "", .roles = {kinetic::GETLOG}};
     std::list<Domain> acl1_domains = {
-        {.offset = 0, .value = "", .roles = {kinetic::GETLOG}},
+        domain1,
     };
     ACL acl1;
     acl1.client_id = 1000;
     acl1.hmac_key = "foobarbaz";
     acl1.domains = acl1_domains;
 
-    std::list<Domain> acl2_domains = {
-        {.offset = 0, .value = "", .roles = {
+    Domain domain2 = {.offset = 0, .value = "", .roles = {
             kinetic::READ,
             kinetic::WRITE,
             kinetic::DELETE,
@@ -66,7 +61,9 @@ int main(int argc, char* argv[]) {
             kinetic::P2POP,
             kinetic::GETLOG,
             kinetic::SECURITY},
-        }
+    };
+    std::list<Domain> acl2_domains = {
+        domain2
     };
     ACL acl2;
     acl2.client_id = 1;
@@ -79,7 +76,7 @@ int main(int argc, char* argv[]) {
 
     printf("Setting ACLs...");
 
-    if (kinetic_connection->SetACLs(acls).ok()) {
+    if (connection->blocking().SetACLs(acls).ok()) {
         printf("Success!\n");
         return 0;
     } else {

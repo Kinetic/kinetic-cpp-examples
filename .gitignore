@@ -20,3 +20,4 @@ kinetic_cpp_client_examples.xcodeproj/
 delete_file_nonblocking
 write_file_nonblocking
 /firmware_update
+blocking_example
