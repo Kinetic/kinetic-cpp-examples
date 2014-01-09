@@ -48,14 +48,14 @@ int main(int argc, char* argv[]) {
     }
 
 
-    KineticRecord* record;
+    std::unique_ptr<KineticRecord> record;
     if(!connection->blocking().Get(kinetic_key, &record).ok()) {
         printf("Unable to get metadata\n");
         return 1;
     }
 
     ssize_t file_size = std::stoll(record->value());
-    delete record;
+
     printf("Reading file of size %zd\n", file_size);
 
     int file = open(output_file_name, O_RDWR | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);
@@ -82,15 +82,13 @@ int main(int argc, char* argv[]) {
         sprintf(key_buffer, "%s-%10" PRId64, kinetic_key, i);
         std::string key(key_buffer);
 
-        KineticRecord* record;
         if(!connection->blocking().Get(key, &record).ok()) {
             printf("Unable to get chunk\n");
             return 1;
         }
         
         record->value().copy(output_buffer + i, block_length);
-        delete record;
-        
+
         printf(".");
         fflush(stdout);
     }

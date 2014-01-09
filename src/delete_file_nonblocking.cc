@@ -64,14 +64,13 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    KineticRecord* record;
+    std::unique_ptr<KineticRecord> record;
     if(!connection->blocking().Get(kinetic_key, &record).ok()) {
         printf("Unable to get metadata\n");
         return 1;
     }
 
     long long file_size = std::stoll(record->value());
-    delete record;
     printf("Deleting file of size %llu\n", file_size);
 
     char key_buffer[100];
