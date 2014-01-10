@@ -7,17 +7,11 @@
 #include "kinetic/kinetic_connection_factory.h"
 #include "value_factory.h"
 
-using com::seagate::kinetic::HmacProvider;
-using com::seagate::kinetic::proto::Message;
-using com::seagate::kinetic::proto::Message_MessageType_GET;
-using com::seagate::kinetic::proto::Message_Algorithm_SHA1;
-using com::seagate::kinetic::ValueFactory;
 using kinetic::DriveLog;
 using kinetic::Capacity;
 using kinetic::OperationStatistic;
 using kinetic::Utilization;
 using kinetic::Temperature;
-using palominolabs::protobufutil::MessageStreamFactory;
 
 void dump_all_information(const DriveLog& drive_log);
 void print_temp_report(const DriveLog& drive_log, bool print_headers);

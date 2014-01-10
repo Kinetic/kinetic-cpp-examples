@@ -12,22 +12,13 @@
 #include "value_factory.h"
 #include "socket_wrapper.h"
 
-using com::seagate::kinetic::HmacProvider;
-using com::seagate::kinetic::proto::Message;
-using com::seagate::kinetic::proto::Message_MessageType_GET;
-using com::seagate::kinetic::proto::Message_Algorithm_SHA1;
-using com::seagate::kinetic::ValueFactory;
 using kinetic::KineticConnectionFactory;
 using kinetic::Status;
 using kinetic::KineticRecord;
-using palominolabs::protobufutil::MessageStreamFactory;
-using com::seagate::kinetic::HmacProvider;
 using kinetic::NonblockingError ;
 using kinetic::ConnectionOptions;
 using kinetic::GetCallbackInterface;
-using kinetic::Message;
 using kinetic::NonblockingKineticConnection;
-using kinetic::SocketWrapper;
 
 class Callback : public GetCallbackInterface {
 public:
@@ -79,14 +70,13 @@ int main(int argc, char* argv[]) {
     }
 
 
-    KineticRecord* record;
+    std::unique_ptr<KineticRecord> record;
     if(!connection->blocking().Get(kinetic_key, &record).ok()) {
         printf("Unable to get metadata\n");
         return 1;
     }
 
     long long file_size = std::stoll(record->value());
-    delete record;
     printf("Reading file of size %llu\n", file_size);
 
 
