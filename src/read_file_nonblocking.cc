@@ -12,22 +12,13 @@
 #include "value_factory.h"
 #include "socket_wrapper.h"
 
-using com::seagate::kinetic::HmacProvider;
-using com::seagate::kinetic::proto::Message;
-using com::seagate::kinetic::proto::Message_MessageType_GET;
-using com::seagate::kinetic::proto::Message_Algorithm_SHA1;
-using com::seagate::kinetic::ValueFactory;
 using kinetic::KineticConnectionFactory;
 using kinetic::Status;
 using kinetic::KineticRecord;
-using palominolabs::protobufutil::MessageStreamFactory;
-using com::seagate::kinetic::HmacProvider;
 using kinetic::NonblockingError ;
 using kinetic::ConnectionOptions;
 using kinetic::GetCallbackInterface;
-using kinetic::Message;
 using kinetic::NonblockingKineticConnection;
-using kinetic::SocketWrapper;
 
 class Callback : public GetCallbackInterface {
 public:

@@ -8,17 +8,11 @@
 #include "kinetic/kinetic_connection_factory.h"
 #include "value_factory.h"
 
-using com::seagate::kinetic::HmacProvider;
-using com::seagate::kinetic::proto::Message;
-using com::seagate::kinetic::proto::Message_MessageType_GET;
-using com::seagate::kinetic::proto::Message_Algorithm_SHA1;
-using com::seagate::kinetic::ValueFactory;
 using kinetic::KineticConnectionFactory;
 using kinetic::Status;
 using kinetic::KineticRecord;
 using kinetic::ACL;
 using kinetic::Domain;
-using palominolabs::protobufutil::MessageStreamFactory;
 
 int main(int argc, char* argv[]) {
     if (argc != 3) {

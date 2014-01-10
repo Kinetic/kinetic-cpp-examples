@@ -9,17 +9,11 @@
 #include "value_factory.h"
 #include "socket_wrapper.h"
 
-using com::seagate::kinetic::HmacProvider;
-using com::seagate::kinetic::proto::Message;
-using com::seagate::kinetic::proto::Message_MessageType_GET;
-using com::seagate::kinetic::proto::Message_Algorithm_SHA1;
-using com::seagate::kinetic::ValueFactory;
 using kinetic::KineticConnectionFactory;
 using kinetic::KineticRecord;
 using kinetic::NonblockingError;
 using kinetic::SimpleCallbackInterface;
 using kinetic::Status;
-using palominolabs::protobufutil::MessageStreamFactory;
 
 class DeleteCallback : public SimpleCallbackInterface {
 public:
