@@ -5,7 +5,6 @@
 
 #include "kinetic/connection_options.h"
 #include "kinetic/kinetic_connection_factory.h"
-#include "value_factory.h"
 
 using kinetic::DriveLog;
 using kinetic::Capacity;

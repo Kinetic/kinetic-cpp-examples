@@ -6,7 +6,6 @@
 
 #include "kinetic/connection_options.h"
 #include "kinetic/kinetic_connection_factory.h"
-#include "value_factory.h"
 #include "socket_wrapper.h"
 
 using kinetic::KineticConnectionFactory;
@@ -79,11 +78,11 @@ int main(int argc, char* argv[]) {
         sprintf(key_buffer, "%s-%10" PRId64, kinetic_key, i);
         remaining++;
         std::string key(key_buffer);
-        connection->nonblocking().Delete(key, "", true, &callback);
+        connection->nonblocking().Delete(key, "", kinetic::IGNORE_VERSION, &callback);
     }
 
     remaining++;
-    connection->nonblocking().Delete(kinetic_key, "", true, &callback);
+    connection->nonblocking().Delete(kinetic_key, "", kinetic::IGNORE_VERSION, &callback);
 
 
     fd_set read_fds, write_fds;
