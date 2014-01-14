@@ -10,7 +10,6 @@
 
 #include "kinetic/connection_options.h"
 #include "kinetic/kinetic_connection_factory.h"
-#include "value_factory.h"
 
 using com::seagate::kinetic::proto::Message_Algorithm_SHA1;
 using kinetic::KineticConnectionFactory;
@@ -86,7 +85,7 @@ int main(int argc, char* argv[]) {
 
         KineticRecord record(value, "", "", Message_Algorithm_SHA1);
         remaining++;
-        connection->nonblocking().Put(key, "", true, record, &callback);
+        connection->nonblocking().Put(key, "", kinetic::IGNORE_VERSION, record, &callback);
         connection->nonblocking().Run(&read_fds, &write_fds, &num_fds);
 
     }
@@ -94,7 +93,7 @@ int main(int argc, char* argv[]) {
     KineticRecord record(std::to_string(inputfile_stat.st_size), "", "", Message_Algorithm_SHA1);
     remaining++;
 
-    connection->nonblocking().Put(kinetic_key, "", true, record, &callback);
+    connection->nonblocking().Put(kinetic_key, "", kinetic::IGNORE_VERSION, record, &callback);
 
     connection->nonblocking().Run(&read_fds, &write_fds, &num_fds);
     while (remaining > 0) {

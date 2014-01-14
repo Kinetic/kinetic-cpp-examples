@@ -9,7 +9,6 @@
 
 #include "kinetic/connection_options.h"
 #include "kinetic/kinetic_connection_factory.h"
-#include "value_factory.h"
 #include "socket_wrapper.h"
 
 using kinetic::KineticConnectionFactory;

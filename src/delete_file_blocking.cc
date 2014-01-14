@@ -6,7 +6,6 @@
 
 #include "kinetic/connection_options.h"
 #include "kinetic/kinetic_connection_factory.h"
-#include "value_factory.h"
 #include "socket_wrapper.h"
 
 using com::seagate::kinetic::proto::Message_Algorithm_SHA1;
@@ -60,7 +59,7 @@ int main(int argc, char* argv[]) {
 
         sprintf(key_buffer, "%s-%10" PRId64, kinetic_key, i);
         std::string key(key_buffer);
-        if (connection->blocking().Delete(key, "", true).ok()) {
+        if (connection->blocking().Delete(key, "", kinetic::IGNORE_VERSION).ok()) {
             printf(".");
         } else {
             printf("X");
@@ -68,7 +67,7 @@ int main(int argc, char* argv[]) {
         fflush(stdout);
     }
 
-    if (!connection->blocking().Delete(kinetic_key, "", true).ok()) {
+    if (!connection->blocking().Delete(kinetic_key, "", kinetic::IGNORE_VERSION).ok()) {
         printf("Unable to delete metadata\n");
     }
 

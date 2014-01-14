@@ -9,7 +9,6 @@
 
 #include "kinetic/connection_options.h"
 #include "kinetic/kinetic_connection_factory.h"
-#include "value_factory.h"
 
 using com::seagate::kinetic::proto::Message_Algorithm_SHA1;
 using kinetic::KineticConnectionFactory;
@@ -60,7 +59,7 @@ int main(int argc, char* argv[]) {
         if(!connection->blocking().Put(
                 key,
                 "",
-                true,
+                kinetic::IGNORE_VERSION,
                 KineticRecord(value, "", "", Message_Algorithm_SHA1)).ok()) {
             printf("Unable to write a chunk\n");
             return 1;
@@ -74,7 +73,7 @@ int main(int argc, char* argv[]) {
     if (!connection->blocking().Put(
             kinetic_key,
             "",
-            true,
+            kinetic::IGNORE_VERSION,
             KineticRecord(std::to_string(inputfile_stat.st_size), "", "", Message_Algorithm_SHA1)).ok()) {
         printf("Unable to write metadata\n");
         return 1;
