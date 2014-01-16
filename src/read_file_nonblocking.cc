@@ -5,11 +5,9 @@
 #include <sys/mman.h>
 #include <memory>
 
-#include "protobufutil/message_stream.h"
+#include "kinetic/kinetic.h"
 
-#include "kinetic/connection_options.h"
-#include "kinetic/kinetic_connection_factory.h"
-#include "socket_wrapper.h"
+#include "glog/logging.h"
 
 using kinetic::KineticConnectionFactory;
 using kinetic::Status;

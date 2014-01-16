@@ -3,8 +3,7 @@
 #include <inttypes.h>
 #include <stdio.h>
 
-#include "kinetic/connection_options.h"
-#include "kinetic/kinetic_connection_factory.h"
+#include "kinetic/kinetic.h"
 
 using kinetic::DriveLog;
 using kinetic::Capacity;

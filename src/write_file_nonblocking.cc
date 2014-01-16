@@ -6,10 +6,8 @@
 #include <sys/mman.h>
 #include <inttypes.h>
 
-#include "protobufutil/message_stream.h"
-
-#include "kinetic/connection_options.h"
-#include "kinetic/kinetic_connection_factory.h"
+#include "kinetic/kinetic.h"
+#include "glog/logging.h"
 
 using com::seagate::kinetic::proto::Message_Algorithm_SHA1;
 using kinetic::KineticConnectionFactory;

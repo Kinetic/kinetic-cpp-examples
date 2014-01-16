@@ -3,10 +3,7 @@
 #include <stdio.h>
 #include <fstream>
 
-#include "protobufutil/message_stream.h"
-
-#include "kinetic/connection_options.h"
-#include "kinetic/kinetic_connection_factory.h"
+#include "kinetic/kinetic.h"
 
 using kinetic::KineticConnectionFactory;
 using kinetic::Status;
