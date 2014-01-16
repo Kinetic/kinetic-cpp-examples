@@ -28,7 +28,6 @@ include_directories(
     ${KINETIC_CLIENT_PATH}/vendor/src/protobufutil/vendor/include
     ${KINETIC_CLIENT_PATH}/vendor/src/protobufutil/include
     ${KINETIC_CLIENT_PATH}/vendor/src/protobufutil/vendor/src/gmock/fused-src
-    ${KINETIC_CLIENT_PATH}/src/main
     ${KINETIC_CLIENT_PATH}/src/main/generated
     ${KINETIC_CLIENT_PATH}/include
 )
