@@ -8,6 +8,9 @@ using kinetic::KineticConnectionFactory;
 using kinetic::Status;
 using kinetic::KineticRecord;
 
+using std::string;
+using std::make_shared;
+
 int main(int argc, char* argv[]) {
     if (argc != 4 && argc != 5) {
         printf("%s: <host> <port> <new pin>\n", argv[0]);
@@ -35,10 +38,10 @@ int main(int argc, char* argv[]) {
     bool success;
 
     if (argc == 4) {
-        success = connection->blocking().SetPin(argv[3]).ok();
+        success = connection->blocking().SetPin(make_shared<string>(argv[3])).ok();
     } else {
-        const std::string pin(argv[3]);
-        success = connection->blocking().SetPin(argv[4], &pin).ok();
+        auto pin = make_shared<string>(argv[3]);
+        success = connection->blocking().SetPin(make_shared<string>(argv[4]), pin).ok();
     }
 
     if (success) {

@@ -8,6 +8,9 @@ using kinetic::KineticConnectionFactory;
 using kinetic::Status;
 using kinetic::KineticRecord;
 
+using std::shared_ptr;
+using std::string;
+
 int main(int argc, char* argv[]) {
     if (argc != 3 && argc != 4) {
         printf("%s: <host> <port>\n", argv[0]);
@@ -32,20 +35,16 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    std::string* pin = NULL;
+    shared_ptr<string> pin;
 
     if (argc == 3) {
         printf("Performing ISE on %s:%d\n", host, port);
     } else {
-        pin = new std::string(argv[3]);
+        pin.reset(new std::string(argv[3]));
         printf("Performing ISE on %s:%d with pin %s\n", host, port, argv[3]);
     }
 
     bool success = connection->blocking().InstantSecureErase(pin).ok();
-
-    if (pin) {
-        delete pin;
-    }
 
     if (!success) {
         printf("Unable to execute ISE\n");

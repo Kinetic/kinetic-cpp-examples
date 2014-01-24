@@ -14,7 +14,9 @@ using kinetic::KineticConnectionFactory;
 using kinetic::Status;
 using kinetic::KineticRecord;
 using kinetic::PutCallbackInterface;
-using kinetic::NonblockingError ;
+using kinetic::NonblockingError;
+
+using std::make_shared;
 
 class PutCallback : public PutCallbackInterface {
 public:
@@ -68,7 +70,7 @@ int main(int argc, char* argv[]) {
     fd_set read_fds, write_fds;
     int num_fds = 0;
 
-    PutCallback callback(&remaining);
+    auto callback = make_shared<PutCallback>(&remaining);
 
     for (int64_t i = 0; i < inputfile_stat.st_size; i += 1024*1024) {
         int value_size = 1024*1024;
@@ -81,17 +83,17 @@ int main(int argc, char* argv[]) {
         std::string key(key_buffer);
         std::string value(inputfile_data + i, value_size);
 
-        KineticRecord record(value, "", "", Message_Algorithm_SHA1);
+        auto record = make_shared<KineticRecord>(value, "", "", Message_Algorithm_SHA1);
         remaining++;
-        connection->nonblocking().Put(key, "", kinetic::IGNORE_VERSION, record, &callback);
+        connection->nonblocking().Put(key, "", kinetic::IGNORE_VERSION, record, callback);
         connection->nonblocking().Run(&read_fds, &write_fds, &num_fds);
 
     }
 
-    KineticRecord record(std::to_string(inputfile_stat.st_size), "", "", Message_Algorithm_SHA1);
+    auto record = make_shared<KineticRecord>(std::to_string(inputfile_stat.st_size), "", "", Message_Algorithm_SHA1);
     remaining++;
 
-    connection->nonblocking().Put(kinetic_key, "", kinetic::IGNORE_VERSION, record, &callback);
+    connection->nonblocking().Put(kinetic_key, "", kinetic::IGNORE_VERSION, record, callback);
 
     connection->nonblocking().Run(&read_fds, &write_fds, &num_fds);
     while (remaining > 0) {

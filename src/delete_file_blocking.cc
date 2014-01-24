@@ -39,12 +39,12 @@ int main(int argc, char* argv[]) {
     }
 
     std::unique_ptr<KineticRecord> record;
-    if(!connection->blocking().Get(kinetic_key, &record).ok()) {
+    if(!connection->blocking().Get(kinetic_key, record).ok()) {
         printf("Unable to get metadata\n");
         return 1;
     }
 
-    long long file_size = std::stoll(record->value());
+    long long file_size = std::stoll(*(record->value()));
     printf("Deleting file of size %llu\n", file_size);
 
     char key_buffer[100];

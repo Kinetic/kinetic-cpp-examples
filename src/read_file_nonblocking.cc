@@ -17,15 +17,18 @@ using kinetic::ConnectionOptions;
 using kinetic::GetCallbackInterface;
 using kinetic::NonblockingKineticConnection;
 
+using std::shared_ptr;
+using std::vector;
+
 class Callback : public GetCallbackInterface {
 public:
     Callback(char* buffer, unsigned int expected_length, int* remaining) : buffer_(buffer), expected_length_(expected_length), remaining_(remaining) {};
     void Success(const std::string &key, std::unique_ptr<KineticRecord> record) {
-        if(expected_length_ != record->value().size()) {
+        if(expected_length_ != record->value()->size()) {
             printf("Received value chunk of wrong size\n");
             exit(1);
         }
-        record->value().copy(buffer_, expected_length_);
+        record->value()->copy(buffer_, expected_length_);
         printf(".");
         fflush(stdout);
         (*remaining_)--;
@@ -68,12 +71,12 @@ int main(int argc, char* argv[]) {
 
 
     std::unique_ptr<KineticRecord> record;
-    if(!connection->blocking().Get(kinetic_key, &record).ok()) {
+    if(!connection->blocking().Get(kinetic_key, record).ok()) {
         printf("Unable to get metadata\n");
         return 1;
     }
 
-    long long file_size = std::stoll(record->value());
+    long long file_size = std::stoll(*(record->value()));
     printf("Reading file of size %llu\n", file_size);
 
 
@@ -100,7 +103,7 @@ int main(int argc, char* argv[]) {
     int remaining = 0;
     fd_set read_fds, write_fds;
     int num_fds = 0;
-    std::vector<std::unique_ptr<Callback> > callbacks;
+    vector<shared_ptr<Callback> > callbacks;
     for (int64_t i = 0; i < file_size; i += 1024*1024) {
         unsigned int block_length = 1024*1024;
         if (i + block_length > file_size) {
@@ -109,8 +112,8 @@ int main(int argc, char* argv[]) {
 
         sprintf(key_buffer, "%s-%10" PRId64, kinetic_key, i);
         remaining++;
-        std::unique_ptr<Callback> callback(new Callback(output_buffer + i, block_length, &remaining));
-        connection->nonblocking().Get(std::string(key_buffer), callback.get());
+        shared_ptr<Callback> callback(new Callback(output_buffer + i, block_length, &remaining));
+        connection->nonblocking().Get(std::string(key_buffer), callback);
         connection->nonblocking().Run(&read_fds, &write_fds, &num_fds);
         callbacks.push_back(std::move(callback));
     }

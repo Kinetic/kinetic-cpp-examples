@@ -9,6 +9,9 @@ using kinetic::KineticConnectionFactory;
 using kinetic::Status;
 using kinetic::KineticRecord;
 
+using std::make_shared;
+using std::string;
+
 int main(int argc, char* argv[]) {
 
     if (argc != 3) {
@@ -42,7 +45,8 @@ int main(int argc, char* argv[]) {
         contents << in.rdbuf();
     }
 
-    if (!connection->blocking().UpdateFirmware(contents.str()).ok()) {
+    auto value = make_shared<string>(contents.str());
+    if (!connection->blocking().UpdateFirmware(value).ok()) {
         printf("Unable to send firmware\n");
         return 1;
     }

@@ -14,6 +14,8 @@ using kinetic::KineticConnectionFactory;
 using kinetic::Status;
 using kinetic::KineticRecord;
 
+using std::make_shared;
+
 int main(int argc, char* argv[]) {
     google::InitGoogleLogging(argv[0]);
 
@@ -59,7 +61,7 @@ int main(int argc, char* argv[]) {
                 key,
                 "",
                 kinetic::IGNORE_VERSION,
-                KineticRecord(value, "", "", Message_Algorithm_SHA1)).ok()) {
+                make_shared<KineticRecord>(value, "", "", Message_Algorithm_SHA1)).ok()) {
             printf("Unable to write a chunk\n");
             return 1;
         }
@@ -73,7 +75,7 @@ int main(int argc, char* argv[]) {
             kinetic_key,
             "",
             kinetic::IGNORE_VERSION,
-            KineticRecord(std::to_string(inputfile_stat.st_size), "", "", Message_Algorithm_SHA1)).ok()) {
+            make_shared<KineticRecord>(std::to_string(inputfile_stat.st_size), "", "", Message_Algorithm_SHA1)).ok()) {
         printf("Unable to write metadata\n");
         return 1;
     }

@@ -10,6 +10,9 @@ using kinetic::KineticRecord;
 using kinetic::ACL;
 using kinetic::Domain;
 
+using std::list;
+using std::make_shared;
+
 int main(int argc, char* argv[]) {
     if (argc != 3) {
         printf("%s: <host> <port>\n", argv[0]);
@@ -60,9 +63,9 @@ int main(int argc, char* argv[]) {
     acl2.hmac_key = "asdfasdf";
     acl2.domains = acl2_domains;
 
-    std::list<ACL> acls;
-    acls.push_back(acl1);
-    acls.push_back(acl2);
+    auto acls = make_shared<list<ACL>>();
+    acls->push_back(acl2);
+    acls->push_back(acl1);
 
     printf("Setting ACLs...");
 

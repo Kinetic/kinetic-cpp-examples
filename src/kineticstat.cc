@@ -11,6 +11,8 @@ using kinetic::OperationStatistic;
 using kinetic::Utilization;
 using kinetic::Temperature;
 
+using std::unique_ptr;
+
 void dump_all_information(const DriveLog& drive_log);
 void print_temp_report(const DriveLog& drive_log, bool print_headers);
 void print_utilization_report(const DriveLog& drive_log, bool print_headers);
@@ -41,13 +43,13 @@ int main(int argc, char* argv[]) {
 
     if (argc == 2) {
         // User just specified host so dump everything
-        DriveLog drive_log;
-        if(!connection->blocking().GetLog(&drive_log).ok()) {
+        unique_ptr<DriveLog> drive_log;
+        if(!connection->blocking().GetLog(drive_log).ok()) {
             printf("Unable to get log\n");
             return 1;
         }
 
-        dump_all_information(drive_log);
+        dump_all_information(*drive_log);
     } else {
         // User wants to poll host so figure out the information so start
         // the polling
@@ -55,8 +57,8 @@ int main(int argc, char* argv[]) {
         int report_interval = atoi(argv[3]);
         int report_number = 0;
         while (true) {
-            DriveLog drive_log;
-            if(!connection->blocking().GetLog(&drive_log).ok()) {
+            unique_ptr<DriveLog> drive_log;
+            if(!connection->blocking().GetLog(drive_log).ok()) {
                 printf("Unable to get log\n");
                 return 1;
             }
@@ -64,11 +66,11 @@ int main(int argc, char* argv[]) {
             bool print_headers = report_number % 5 == 0;
 
             if (report_type == "temp") {
-                print_temp_report(drive_log, print_headers);
+                print_temp_report(*drive_log, print_headers);
             } else if (report_type == "utilization") {
-                print_utilization_report(drive_log, print_headers);
+                print_utilization_report(*drive_log, print_headers);
             } else if (report_type == "stat") {
-                print_operation_stats_report(drive_log, print_headers);
+                print_operation_stats_report(*drive_log, print_headers);
             }
 
             printf("\n");

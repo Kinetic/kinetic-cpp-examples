@@ -1,6 +1,7 @@
 // This deletes a file written using write_file_(non)blocking
 
 #include <stdio.h>
+#include <string>
 
 #include "kinetic/kinetic.h"
 #include "glog/logging.h"
@@ -10,6 +11,9 @@ using kinetic::KineticRecord;
 using kinetic::NonblockingError;
 using kinetic::SimpleCallbackInterface;
 using kinetic::Status;
+
+using std::make_shared;
+using std::string;
 
 class DeleteCallback : public SimpleCallbackInterface {
 public:
@@ -55,17 +59,17 @@ int main(int argc, char* argv[]) {
     }
 
     std::unique_ptr<KineticRecord> record;
-    if(!connection->blocking().Get(kinetic_key, &record).ok()) {
+    if(!connection->blocking().Get(string(kinetic_key), record).ok()) {
         printf("Unable to get metadata\n");
         return 1;
     }
 
-    long long file_size = std::stoll(record->value());
+    long long file_size = std::stoll(*(record->value()));
     printf("Deleting file of size %llu\n", file_size);
 
     char key_buffer[100];
     int remaining = 0;
-    DeleteCallback callback(&remaining);
+    auto callback = make_shared<DeleteCallback>(&remaining);
     for (int64_t i = 0; i < file_size; i += 1024*1024) {
         unsigned int block_length = 1024*1024;
         if (i + block_length > file_size) {
@@ -75,11 +79,11 @@ int main(int argc, char* argv[]) {
         sprintf(key_buffer, "%s-%10" PRId64, kinetic_key, i);
         remaining++;
         std::string key(key_buffer);
-        connection->nonblocking().Delete(key, "", kinetic::IGNORE_VERSION, &callback);
+        connection->nonblocking().Delete(key, "", kinetic::IGNORE_VERSION, callback);
     }
 
     remaining++;
-    connection->nonblocking().Delete(kinetic_key, "", kinetic::IGNORE_VERSION, &callback);
+    connection->nonblocking().Delete(kinetic_key, "", kinetic::IGNORE_VERSION, callback);
 
 
     fd_set read_fds, write_fds;
