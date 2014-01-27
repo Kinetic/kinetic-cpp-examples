@@ -12,6 +12,7 @@ using kinetic::Domain;
 
 using std::list;
 using std::make_shared;
+using std::unique_ptr;
 
 int main(int argc, char* argv[]) {
     if (argc != 3) {
@@ -30,8 +31,8 @@ int main(int argc, char* argv[]) {
 
     kinetic::KineticConnectionFactory kinetic_connection_factory = kinetic::NewKineticConnectionFactory();
 
-    kinetic::ConnectionHandle* connection;
-    if (!kinetic_connection_factory.NewConnection(options, &connection).ok()) {
+    unique_ptr<kinetic::ConnectionHandle> connection;
+    if (!kinetic_connection_factory.NewConnection(options, connection).ok()) {
         printf("Unable to connect\n");
         return 1;
     }

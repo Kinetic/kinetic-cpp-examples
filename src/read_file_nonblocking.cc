@@ -19,6 +19,7 @@ using kinetic::NonblockingKineticConnection;
 
 using std::shared_ptr;
 using std::vector;
+using std::unique_ptr;
 
 class Callback : public GetCallbackInterface {
 public:
@@ -63,8 +64,8 @@ int main(int argc, char* argv[]) {
 
     KineticConnectionFactory kinetic_connection_factory = kinetic::NewKineticConnectionFactory();
 
-    kinetic::ConnectionHandle* connection;
-    if(!kinetic_connection_factory.NewConnection(options, &connection).ok()) {
+    unique_ptr<kinetic::ConnectionHandle> connection;
+    if(!kinetic_connection_factory.NewConnection(options, connection).ok()) {
         printf("Unable to connect\n");
         return 1;
     }
@@ -128,7 +129,6 @@ int main(int argc, char* argv[]) {
 
     printf("\nDone!\n");
 
-    delete connection;
     google::protobuf::ShutdownProtobufLibrary();
     google::ShutdownGoogleLogging();
     google::ShutDownCommandLineFlags();

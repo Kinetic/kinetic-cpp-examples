@@ -17,6 +17,7 @@ using kinetic::PutCallbackInterface;
 using kinetic::NonblockingError;
 
 using std::make_shared;
+using std::unique_ptr;
 
 class PutCallback : public PutCallbackInterface {
 public:
@@ -55,8 +56,8 @@ int main(int argc, char* argv[]) {
 
     KineticConnectionFactory kinetic_connection_factory = kinetic::NewKineticConnectionFactory();
 
-    kinetic::ConnectionHandle* connection;
-    if (!kinetic_connection_factory.NewConnection(options, &connection).ok()) {
+    unique_ptr<kinetic::ConnectionHandle> connection;
+    if (!kinetic_connection_factory.NewConnection(options, connection).ok()) {
         printf("Unable to connect\n");
         return 1;
     }
@@ -106,7 +107,6 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    delete connection;
     google::protobuf::ShutdownProtobufLibrary();
     google::ShutdownGoogleLogging();
     google::ShutDownCommandLineFlags();

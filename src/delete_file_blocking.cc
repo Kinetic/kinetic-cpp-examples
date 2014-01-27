@@ -12,6 +12,7 @@ using kinetic::NonblockingError;
 using kinetic::SimpleCallbackInterface;
 using kinetic::Status;
 
+using std::unique_ptr;
 
 int main(int argc, char* argv[]) {
     google::InitGoogleLogging(argv[0]);
@@ -32,8 +33,8 @@ int main(int argc, char* argv[]) {
 
     KineticConnectionFactory kinetic_connection_factory = kinetic::NewKineticConnectionFactory();
 
-    kinetic::ConnectionHandle* connection;
-    if(!kinetic_connection_factory.NewConnection(options, &connection).ok()) {
+    unique_ptr<kinetic::ConnectionHandle> connection;
+    if(!kinetic_connection_factory.NewConnection(options, connection).ok()) {
         printf("Unable to connect\n");
         return 1;
     }
@@ -70,7 +71,6 @@ int main(int argc, char* argv[]) {
 
     printf("\nDone!\n");
 
-    delete connection;
     google::protobuf::ShutdownProtobufLibrary();
     google::ShutdownGoogleLogging();
     google::ShutDownCommandLineFlags();
