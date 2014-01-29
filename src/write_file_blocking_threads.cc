@@ -96,7 +96,7 @@ int main(int argc, char* argv[]) {
             kinetic_key,
             "",
             kinetic::IGNORE_VERSION,
-            make_shared<KineticRecord>(std::to_string(inputfile_stat.st_size), "", "", Message_Algorithm_SHA1)).ok()) {
+            KineticRecord(std::to_string(inputfile_stat.st_size), "", "", Message_Algorithm_SHA1)).ok()) {
         printf("Unable to write metadata\n");
         return 1;
     }
@@ -133,7 +133,7 @@ void put_range(int64_t start, int64_t end, int64_t total_size, const char* kinet
                 key,
                 "",
                 kinetic::IGNORE_VERSION,
-                make_shared<KineticRecord>(value, "", "", Message_Algorithm_SHA1)).ok()) {
+                KineticRecord(value, "", "", Message_Algorithm_SHA1)).ok()) {
             printf("Unable to write chunk\n");
             return;
         }

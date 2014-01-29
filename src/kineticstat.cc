@@ -21,8 +21,9 @@ void print_operation_stats_report(const DriveLog& drive_log, bool print_headers)
 int main(int argc, char* argv[]) {
     (void) argc;
 
-    if (argc != 2 && argc != 4) {
+    if (argc < 2 || argc > 4) {
         printf("Usage: %s <host>\n", argv[0]);
+        printf("       %s <host> log", argv[0]);
         printf("       %s <host> <temp|utilization|stat> <interval>\n", argv[0]);
         return 1;
     }
@@ -50,6 +51,15 @@ int main(int argc, char* argv[]) {
         }
 
         dump_all_information(*drive_log);
+    } else if(argc == 3) {
+        // User wants the logs
+        unique_ptr<DriveLog> drive_log;
+        if(!connection->blocking().GetLog(drive_log).ok()) {
+            printf("Unable to get log\n");
+            return 1;
+        }
+
+        printf("%s\n", drive_log->messages.c_str());
     } else {
         // User wants to poll host so figure out the information so start
         // the polling
@@ -125,6 +135,9 @@ void dump_all_information(const DriveLog& drive_log) {
         ++it) {
         printf("  %s: %.0f\u00B0C\n", it->name.c_str(), it->current_degc);
     }
+
+    printf("\nMessages:\n");
+    printf("%s\n", drive_log.messages.c_str());
 }
 
 void print_temp_report(const DriveLog& drive_log, bool print_headers) {
