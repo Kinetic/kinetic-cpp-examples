@@ -69,7 +69,8 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    printf("file is %lli\n", inputfile_stat.st_size);
+    // the definition of off_t varies a lot between OSs
+    printf("file is %lld\n", (long long) inputfile_stat.st_size);
 
     vector<unique_ptr<thread>> threads;
     int chunk = 100 * 1024 * 1024;
@@ -83,7 +84,7 @@ int main(int argc, char* argv[]) {
         threads.push_back(move(t));
     }
 
-    printf("%lu threads spawned\n", threads.size());
+    printf("%" PRIuPTR " threads spawned\n", threads.size());
 
     for (auto ci = threads.begin(); ci != threads.end(); ++ci) {
         (*ci)->join();
@@ -111,7 +112,7 @@ int main(int argc, char* argv[]) {
 
 void put_range(int64_t start, int64_t end, int64_t total_size, const char* kinetic_key,
         const char* input_file_name, shared_ptr<kinetic::ConnectionHandle> handle) {
-    printf("thread writing %lli to %lli\n", start, end);
+    printf("thread writing %" PRId64 " to %" PRId64 "\n", start, end);
 
     int file = open(input_file_name, O_RDONLY);
     struct stat inputfile_stat;
