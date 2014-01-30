@@ -16,6 +16,7 @@ using kinetic::KineticRecord;
 
 using std::make_shared;
 using std::unique_ptr;
+using std::to_string;
 
 int main(int argc, char* argv[]) {
     google::InitGoogleLogging(argv[0]);
@@ -76,7 +77,7 @@ int main(int argc, char* argv[]) {
             kinetic_key,
             "",
             kinetic::IGNORE_VERSION,
-            KineticRecord(std::to_string(inputfile_stat.st_size), "", "", Message_Algorithm_SHA1)).ok()) {
+            KineticRecord(to_string(inputfile_stat.st_size), "", "", Message_Algorithm_SHA1)).ok()) {
         printf("Unable to write metadata\n");
         return 1;
     }

@@ -8,7 +8,7 @@
 
 using kinetic::KineticConnectionFactory;
 using kinetic::KineticRecord;
-using kinetic::NonblockingError;
+using kinetic::StatusCode;
 using kinetic::SimpleCallbackInterface;
 using kinetic::Status;
 
@@ -25,7 +25,7 @@ public:
         (*remaining_)--;
     }
 
-    void Failure(NonblockingError error) {
+    void Failure(StatusCode error) {
         printf("Error!\n");
         exit(1);
     }

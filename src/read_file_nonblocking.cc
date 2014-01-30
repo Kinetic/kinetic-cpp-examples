@@ -12,14 +12,15 @@
 using kinetic::KineticConnectionFactory;
 using kinetic::Status;
 using kinetic::KineticRecord;
-using kinetic::NonblockingError ;
 using kinetic::ConnectionOptions;
 using kinetic::GetCallbackInterface;
 using kinetic::NonblockingKineticConnection;
+using kinetic::StatusCode;
 
 using std::shared_ptr;
 using std::vector;
 using std::unique_ptr;
+using std::string;
 
 class Callback : public GetCallbackInterface {
 public:
@@ -34,7 +35,7 @@ public:
         fflush(stdout);
         (*remaining_)--;
     }
-    void Failure(NonblockingError error) {
+    void Failure(StatusCode error) {
         printf("Error!\n");
         exit(1);
     }
@@ -114,7 +115,7 @@ int main(int argc, char* argv[]) {
         sprintf(key_buffer, "%s-%10" PRId64, kinetic_key, i);
         remaining++;
         shared_ptr<Callback> callback(new Callback(output_buffer + i, block_length, &remaining));
-        connection->nonblocking().Get(std::string(key_buffer), callback);
+        connection->nonblocking().Get(string(key_buffer), callback);
         connection->nonblocking().Run(&read_fds, &write_fds, &num_fds);
         callbacks.push_back(std::move(callback));
     }

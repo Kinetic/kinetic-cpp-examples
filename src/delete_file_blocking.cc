@@ -8,7 +8,6 @@
 using com::seagate::kinetic::proto::Message_Algorithm_SHA1;
 using kinetic::KineticConnectionFactory;
 using kinetic::KineticRecord;
-using kinetic::NonblockingError;
 using kinetic::SimpleCallbackInterface;
 using kinetic::Status;
 
