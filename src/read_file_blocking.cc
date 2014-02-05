@@ -11,6 +11,7 @@
 using kinetic::KineticConnectionFactory;
 using kinetic::Status;
 using kinetic::KineticRecord;
+using kinetic::KineticStatus;
 
 using std::unique_ptr;
 
@@ -42,8 +43,9 @@ int main(int argc, char* argv[]) {
 
 
     std::unique_ptr<KineticRecord> record;
-    if(!connection->blocking().Get(kinetic_key, record).ok()) {
-        printf("Unable to get metadata\n");
+    KineticStatus get_status = connection->blocking().Get(kinetic_key, record);
+    if(!get_status.ok()) {
+        printf("Unable to get metadata: %s\n", get_status.message().c_str());
         return 1;
     }
 
