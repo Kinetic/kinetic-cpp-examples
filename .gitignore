@@ -26,3 +26,4 @@ delete_file_nonblocking
 hello_kinetic
 ise
 firmware_update
+dump_keyspace
