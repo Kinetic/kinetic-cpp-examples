@@ -53,7 +53,7 @@ int main(int argc, char* argv[]) {
     KineticConnectionFactory kinetic_connection_factory = kinetic::NewKineticConnectionFactory();
 
     unique_ptr<kinetic::ConnectionHandle> handle_uniq;
-    if (!kinetic_connection_factory.NewThreadsafeConnection(options, handle_uniq).ok()) {
+    if (!kinetic_connection_factory.NewThreadsafeConnection(options, 5, handle_uniq).ok()) {
         printf("Unable to connect\n");
         return 1;
     }

@@ -36,7 +36,7 @@ int main(int argc, char* argv[]) {
     KineticConnectionFactory kinetic_connection_factory = kinetic::NewKineticConnectionFactory();
 
     unique_ptr<kinetic::ConnectionHandle> connection;
-    if(!kinetic_connection_factory.NewConnection(options, connection).ok()) {
+    if(!kinetic_connection_factory.NewConnection(options, 5, connection).ok()) {
         printf("Unable to connect\n");
         return 1;
     }
