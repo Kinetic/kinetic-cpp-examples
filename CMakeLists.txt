@@ -18,7 +18,7 @@ else(USE_LOCAL_KINETIC_CLIENT)
         kinetic_cpp_client
         PREFIX "vendor"
         GIT_REPOSITORY "git@github.com:Seagate/Kinetic-C-Client.git"
-        GIT_TAG "183fbf055169b36e48f9fb4695cd6f81ba9aef42"
+        GIT_TAG "510bc7dea3ab162abc87ac87c2e933ea0833a7bc"
         BUILD_IN_SOURCE 1
         INSTALL_COMMAND ""
     )
@@ -71,3 +71,4 @@ add_example_target(write_file_nonblocking)
 add_example_target(firmware_update)
 add_example_target(write_file_blocking_threads)
 add_example_target(dump_keyspace)
+add_example_target(copydrive)
