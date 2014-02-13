@@ -9,6 +9,7 @@ cmake_install.cmake
 *.build/
 *.xcodeproj/
 vendor/
+/tmp
 
 # binaries
 
