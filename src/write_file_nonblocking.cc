@@ -14,7 +14,7 @@ using kinetic::KineticConnectionFactory;
 using kinetic::Status;
 using kinetic::KineticRecord;
 using kinetic::PutCallbackInterface;
-using kinetic::StatusCode;
+using kinetic::KineticStatus;
 
 using std::make_shared;
 using std::unique_ptr;
@@ -27,8 +27,8 @@ public:
         fflush(stdout);
         (*remaining_)--;
     }
-    void Failure(StatusCode error) {
-        printf("Error!\n");
+    void Failure(KineticStatus error) {
+        printf("Error: %d %s\n", static_cast<int>(error.statusCode()), error.message().c_str());
         exit(1);
     }
 private:
@@ -88,7 +88,6 @@ int main(int argc, char* argv[]) {
         remaining++;
         connection->nonblocking().Put(key, "", kinetic::IGNORE_VERSION, record, callback);
         connection->nonblocking().Run(&read_fds, &write_fds, &num_fds);
-
     }
 
     auto record = make_shared<KineticRecord>(std::to_string(inputfile_stat.st_size), "", "", Message_Algorithm_SHA1);

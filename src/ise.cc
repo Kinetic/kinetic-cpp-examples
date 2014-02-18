@@ -6,6 +6,7 @@
 
 using kinetic::KineticConnectionFactory;
 using kinetic::Status;
+using kinetic::KineticStatus;
 using kinetic::KineticRecord;
 
 using std::shared_ptr;
@@ -45,10 +46,11 @@ int main(int argc, char* argv[]) {
         printf("Performing ISE on %s:%d with pin %s\n", host, port, argv[3]);
     }
 
-    bool success = connection->blocking().InstantSecureErase(pin).ok();
+    KineticStatus status = connection->blocking().InstantSecureErase(pin);
+    bool success = status.ok();
 
     if (!success) {
-        printf("Unable to execute ISE\n");
+        printf("Unable to execute ISE: %d %s\n", static_cast<int>(status.statusCode()), status.message().c_str());
         return 1;
     }
 

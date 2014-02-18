@@ -15,7 +15,7 @@ using kinetic::KineticRecord;
 using kinetic::ConnectionOptions;
 using kinetic::GetCallbackInterface;
 using kinetic::NonblockingKineticConnection;
-using kinetic::StatusCode;
+using kinetic::KineticStatus;
 
 using std::shared_ptr;
 using std::vector;
@@ -36,8 +36,8 @@ public:
         fflush(stdout);
         (*remaining_)--;
     }
-    void Failure(StatusCode error) {
-        printf("Error: %d\n", static_cast<int>(error));
+    void Failure(KineticStatus error) {
+        printf("Error: %d %s\n", static_cast<int>(error.statusCode()), error.message().c_str());
         exit(1);
     }
 private:
