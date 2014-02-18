@@ -26,7 +26,7 @@ public:
     }
 
     void Failure(KineticStatus error) {
-        printf("Error!\n");
+        printf("Error: %d %s\n", static_cast<int>(error.statusCode()), error.message().c_str());
         exit(1);
     }
 private:
