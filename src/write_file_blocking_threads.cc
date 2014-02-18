@@ -16,6 +16,7 @@ using com::seagate::kinetic::proto::Message_Algorithm_SHA1;
 using kinetic::KineticConnectionFactory;
 using kinetic::BlockingKineticConnection;
 using kinetic::Status;
+using kinetic::KineticStatus;
 using kinetic::KineticRecord;
 using kinetic::ConnectionOptions;
 using kinetic::ConnectionHandle;
@@ -129,18 +130,20 @@ void put_range(int64_t start, int64_t end, int64_t total_size, const char* kinet
 
         std::string key(key_buffer);
         std::string value(inputfile_data + i, value_size);
-        if(!handle->blocking().Put(
-                key,
-                "",
-                kinetic::IGNORE_VERSION,
-                KineticRecord(value, "", "", Message_Algorithm_SHA1)).ok()) {
-            printf("Unable to write chunk\n");
+        KineticStatus status = handle->blocking().Put(
+                    key,
+                    "",
+                    kinetic::IGNORE_VERSION,
+                    KineticRecord(value, "", "", Message_Algorithm_SHA1));
+        if(!status.ok()) {
+            printf("Unable to write chunk: %d %s\n", static_cast<int>(status.statusCode()),
+                status.message().c_str());
             return;
         }
         printf(".");
         fflush(stdout);
     }
-    printf("\n");
+    printf("\nThread done\n");
 
     if (close(file)) {
         printf("Unable to close file\n");
