@@ -14,7 +14,7 @@ using kinetic::KineticConnectionFactory;
 using kinetic::Status;
 using kinetic::KineticRecord;
 using kinetic::PutCallbackInterface;
-using kinetic::StatusCode;
+using kinetic::KineticStatus;
 
 using std::make_shared;
 using std::unique_ptr;
@@ -27,7 +27,7 @@ public:
         fflush(stdout);
         (*remaining_)--;
     }
-    void Failure(StatusCode error) {
+    void Failure(KineticStatus error) {
         printf("Error!\n");
         exit(1);
     }

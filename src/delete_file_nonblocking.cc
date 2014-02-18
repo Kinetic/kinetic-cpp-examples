@@ -8,7 +8,7 @@
 
 using kinetic::KineticConnectionFactory;
 using kinetic::KineticRecord;
-using kinetic::StatusCode;
+using kinetic::KineticStatus;
 using kinetic::SimpleCallbackInterface;
 using kinetic::Status;
 
@@ -25,7 +25,7 @@ public:
         (*remaining_)--;
     }
 
-    void Failure(StatusCode error) {
+    void Failure(KineticStatus error) {
         printf("Error!\n");
         exit(1);
     }
