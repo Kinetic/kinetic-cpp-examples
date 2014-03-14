@@ -17,7 +17,6 @@ DEFINE_string(new_pin, "", "New PIN");
 DEFINE_string(old_pin, "", "Old PIN");
 
 int example_main(unique_ptr<kinetic::ConnectionHandle> connection, int argc, char* argv[]) {
-
     bool success;
 
     if (FLAGS_old_pin.empty()) {
