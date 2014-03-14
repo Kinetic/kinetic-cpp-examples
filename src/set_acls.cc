@@ -14,29 +14,7 @@ using std::list;
 using std::make_shared;
 using std::unique_ptr;
 
-int main(int argc, char* argv[]) {
-    if (argc != 3) {
-        printf("%s: <host> <port>\n", argv[0]);
-        return 1;
-    }
-
-    const char* host = argv[1];
-    int port = atoi(argv[2]);
-
-    kinetic::ConnectionOptions options;
-    options.host = host;
-    options.port = port;
-    options.user_id = 1;
-    options.hmac_key = "asdfasdf";
-
-    kinetic::KineticConnectionFactory kinetic_connection_factory = kinetic::NewKineticConnectionFactory();
-
-    unique_ptr<kinetic::ConnectionHandle> connection;
-    if (!kinetic_connection_factory.NewConnection(options, 5, connection).ok()) {
-        printf("Unable to connect\n");
-        return 1;
-    }
-
+int example_main(unique_ptr<kinetic::ConnectionHandle> connection, int argc, char* argv[]) {
     Domain domain1 = {.offset = 0, .value = "", .roles = {kinetic::GETLOG}};
     std::list<Domain> acl1_domains = {
         domain1,
