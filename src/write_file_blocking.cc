@@ -18,33 +18,11 @@ using std::make_shared;
 using std::unique_ptr;
 using std::to_string;
 
-int main(int argc, char* argv[]) {
-    google::InitGoogleLogging(argv[0]);
+DEFINE_string(kinetic_key, "my_file", "Key prefix for storing file chunks");
+DEFINE_string(local_file, "local_file", "Path of file to store in kinetic");
 
-    if (argc != 4) {
-        printf("Usage: %s <host> <kinetic key> <input file name>\n", argv[0]);
-        return 1;
-    }
-
-    const char* host = argv[1];
-    const char* kinetic_key = argv[2];
-    const char* input_file_name = argv[3];
-
-    kinetic::ConnectionOptions options;
-    options.host = host;
-    options.port = 8123;
-    options.user_id = 1;
-    options.hmac_key = "asdfasdf";
-
-    KineticConnectionFactory kinetic_connection_factory = kinetic::NewKineticConnectionFactory();
-
-    unique_ptr<kinetic::ConnectionHandle> connection;
-    if (!kinetic_connection_factory.NewConnection(options, 5, connection).ok()) {
-        printf("Unable to connect\n");
-        return 1;
-    }
-
-    int file = open(input_file_name, O_RDONLY);
+int example_main(std::unique_ptr<kinetic::ConnectionHandle> connection, int argc, char** argv) {
+    int file = open(FLAGS_local_file.c_str(), O_RDONLY);
     struct stat inputfile_stat;
     fstat(file, &inputfile_stat);
     char* inputfile_data = (char*)mmap(0, inputfile_stat.st_size, PROT_READ, MAP_SHARED, file, 0);
@@ -55,7 +33,7 @@ int main(int argc, char* argv[]) {
             value_size = inputfile_stat.st_size - i + 1;
         }
 
-        sprintf(key_buffer, "%s-%10" PRId64, kinetic_key, i);
+        sprintf(key_buffer, "%s-%10" PRId64, FLAGS_kinetic_key.c_str(), i);
 
         std::string key(key_buffer);
         std::string value(inputfile_data + i, value_size);
@@ -74,7 +52,7 @@ int main(int argc, char* argv[]) {
 
 
     if (!connection->blocking().Put(
-            kinetic_key,
+            FLAGS_kinetic_key,
             "",
             kinetic::IGNORE_VERSION,
             KineticRecord(to_string(inputfile_stat.st_size), "", "", Message_Algorithm_SHA1)).ok()) {
@@ -88,10 +66,6 @@ int main(int argc, char* argv[]) {
     }
 
     printf("Done!\n");
-
-    google::protobuf::ShutdownProtobufLibrary();
-    google::ShutdownGoogleLogging();
-    google::ShutDownCommandLineFlags();
 
     return 0;
 }
