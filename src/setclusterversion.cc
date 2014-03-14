@@ -3,6 +3,7 @@
 #include <stdio.h>
 
 #include "kinetic/kinetic.h"
+#include "gflags/gflags.h"
 
 using kinetic::KineticConnectionFactory;
 using kinetic::Status;
@@ -10,33 +11,12 @@ using kinetic::KineticRecord;
 
 using std::unique_ptr;
 
-int main(int argc, char* argv[]) {
-    if (argc != 4) {
-        printf("%s: <host> <port> <new cluster version>\n", argv[0]);
-        return 1;
-    }
+DEFINE_uint64(new_cluster_version, 0, "New cluster version");
 
-    const char* host = argv[1];
-    int port = atoi(argv[2]);
-    int new_cluster_version = atoi(argv[3]);
+int example_main(unique_ptr<kinetic::ConnectionHandle> connection, int argc, char* argv[]) {
+    printf("Setting cluster version of to %" PRIu64 "\n", FLAGS_new_cluster_version);
 
-    printf("Setting cluster version of %s:%d to %d\n", host, port, new_cluster_version);
-
-    kinetic::ConnectionOptions options;
-    options.host = host;
-    options.port = port;
-    options.user_id = 1;
-    options.hmac_key = "asdfasdf";
-
-    kinetic::KineticConnectionFactory kinetic_connection_factory = kinetic::NewKineticConnectionFactory();
-
-    unique_ptr<kinetic::ConnectionHandle> connection;
-    if (!kinetic_connection_factory.NewConnection(options, 5, connection).ok()) {
-        printf("Unable to connect\n");
-        return 1;
-    }
-
-    if (!(connection->blocking().SetClusterVersion(new_cluster_version).ok())) {
+    if (!(connection->blocking().SetClusterVersion(FLAGS_new_cluster_version).ok())) {
         printf("Unable to set cluster version\n");
         return 1;
     }
