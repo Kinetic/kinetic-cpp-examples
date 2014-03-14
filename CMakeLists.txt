@@ -44,10 +44,16 @@ set(LIBRARY_DEPENDENCIES
     dl
 )
 
-macro(add_example_target NAME)
-    add_executable(${NAME}
-        src/example_main.cc
-        src/${NAME}.cc)
+macro(add_example_target NAME USE_EXAMPLE_MAIN)
+    if(${USE_EXAMPLE_MAIN})
+        add_executable(${NAME}
+            src/example_main.cc
+            src/${NAME}.cc)
+    else(${USE_EXAMPLE_MAIN})
+        add_executable(${NAME}
+            src/${NAME}.cc)
+    endif()
+
     target_link_libraries(${NAME} ${LIBRARY_DEPENDENCIES})
     add_dependencies(${NAME} kinetic_cpp_client)
 
@@ -59,18 +65,18 @@ macro(add_example_target NAME)
     )
 endmacro(add_example_target)
 
-add_example_target(kineticstat)
-add_example_target(ise)
-add_example_target(setclusterversion)
-add_example_target(setpin)
-add_example_target(set_acls)
-add_example_target(write_file_blocking)
-add_example_target(read_file_blocking)
-add_example_target(read_file_nonblocking)
-add_example_target(delete_file_nonblocking)
-add_example_target(delete_file_blocking)
-add_example_target(write_file_nonblocking)
-add_example_target(firmware_update)
-add_example_target(write_file_blocking_threads)
-add_example_target(dump_keyspace)
-add_example_target(copydrive)
+add_example_target(kineticstat true)
+add_example_target(ise true)
+add_example_target(setclusterversion true)
+add_example_target(setpin true)
+add_example_target(set_acls true)
+add_example_target(write_file_blocking true)
+add_example_target(read_file_blocking false)
+add_example_target(read_file_nonblocking false)
+add_example_target(delete_file_nonblocking false)
+add_example_target(delete_file_blocking false)
+add_example_target(write_file_nonblocking true)
+add_example_target(firmware_update false)
+add_example_target(write_file_blocking_threads false)
+add_example_target(dump_keyspace false)
+add_example_target(copydrive false)
