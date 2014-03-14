@@ -45,7 +45,9 @@ set(LIBRARY_DEPENDENCIES
 )
 
 macro(add_example_target NAME)
-    add_executable(${NAME} src/${NAME}.cc)
+    add_executable(${NAME}
+        src/example_main.cc
+        src/${NAME}.cc)
     target_link_libraries(${NAME} ${LIBRARY_DEPENDENCIES})
     add_dependencies(${NAME} kinetic_cpp_client)
 
