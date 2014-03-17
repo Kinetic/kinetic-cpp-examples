@@ -11,7 +11,7 @@ DEFINE_uint64(timeout, 30, "Timeout");
 DEFINE_uint64(user_id, 1, "Kinetic User ID");
 DEFINE_string(hmac_key, "asdfasdf", "Kinetic User HMAC key");
 
-void parse_flags(int *argc, char*** argv, std::unique_ptr<kinetic::ConnectionHandle>& connection) {
+bool parse_flags(int *argc, char*** argv, std::unique_ptr<kinetic::ConnectionHandle>& connection) {
     google::ParseCommandLineFlags(argc, argv, true);
 
     kinetic::ConnectionOptions options;
@@ -24,9 +24,10 @@ void parse_flags(int *argc, char*** argv, std::unique_ptr<kinetic::ConnectionHan
 
     if (!kinetic_connection_factory.NewConnection(options, FLAGS_timeout, connection).ok()) {
         printf("Unable to connect\n");
-        exit(1);
+        return false;
     }
-}
 
+    return true;
+}
 
 #endif  // COMMAND_LINE_FLAGS_H_

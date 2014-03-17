@@ -3,8 +3,7 @@
 #include <stdio.h>
 
 #include "kinetic/kinetic.h"
-
-#include "command_line_flags.h"
+#include "gflags/gflags.h"
 
 using kinetic::KineticConnectionFactory;
 using kinetic::Status;
@@ -14,11 +13,8 @@ using std::unique_ptr;
 
 DEFINE_int64(new_cluster_version, 1, "New cluster version");
 
-int main(int argc, char* argv[]) {
-    printf("Setting cluster version of %s:%" PRId64 " to %" PRId64 "\n", FLAGS_host.c_str(), FLAGS_port, FLAGS_new_cluster_version);
-
-    unique_ptr<kinetic::ConnectionHandle> connection;
-    parse_flags(&argc, &argv, connection);
+int example_main(unique_ptr<kinetic::ConnectionHandle> connection, int argc, char* argv[]) {
+    printf("Setting cluster version to %" PRId64 "\n", FLAGS_new_cluster_version);
 
     if (!(connection->blocking().SetClusterVersion(FLAGS_new_cluster_version).ok())) {
         printf("Unable to set cluster version\n");

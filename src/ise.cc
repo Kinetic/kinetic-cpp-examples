@@ -3,6 +3,7 @@
 #include <stdio.h>
 
 #include "kinetic/kinetic.h"
+#include "gflags/gflags.h"
 
 using kinetic::KineticConnectionFactory;
 using kinetic::Status;
@@ -13,38 +14,10 @@ using std::shared_ptr;
 using std::string;
 using std::unique_ptr;
 
-int main(int argc, char* argv[]) {
-    if (argc != 3 && argc != 4) {
-        printf("%s: <host> <port>\n", argv[0]);
-        printf("%s: <host> <port> <pin>\n", argv[0]);
-        return 1;
-    }
+DEFINE_string(pin, "", "PIN");
 
-    const char* host = argv[1];
-    int port = atoi(argv[2]);
-
-    kinetic::ConnectionOptions options;
-    options.host = host;
-    options.port = port;
-    options.user_id = 1;
-    options.hmac_key = "asdfasdf";
-
-    kinetic::KineticConnectionFactory kinetic_connection_factory = kinetic::NewKineticConnectionFactory();
-
-    unique_ptr<kinetic::ConnectionHandle> connection;
-    if (!kinetic_connection_factory.NewConnection(options, 60, connection).ok()) {
-        printf("Unable to connect\n");
-        return 1;
-    }
-
-    shared_ptr<string> pin;
-
-    if (argc == 3) {
-        printf("Performing ISE on %s:%d\n", host, port);
-    } else {
-        pin.reset(new std::string(argv[3]));
-        printf("Performing ISE on %s:%d with pin %s\n", host, port, argv[3]);
-    }
+int example_main(unique_ptr<kinetic::ConnectionHandle> connection, int argc, char* argv[]) {
+    shared_ptr<string> pin(new string(FLAGS_pin));
 
     KineticStatus status = connection->blocking().InstantSecureErase(pin);
     bool success = status.ok();

@@ -3,8 +3,7 @@
 #include <stdio.h>
 
 #include "kinetic/kinetic.h"
-
-#include "command_line_flags.h"
+#include "gflags/gflags.h"
 
 using kinetic::KineticConnectionFactory;
 using kinetic::Status;
@@ -17,10 +16,7 @@ using std::unique_ptr;
 DEFINE_string(new_pin, "", "New PIN");
 DEFINE_string(old_pin, "", "Old PIN");
 
-int main(int argc, char* argv[]) {
-    unique_ptr<kinetic::ConnectionHandle> connection;
-    parse_flags(&argc, &argv, connection);
-
+int example_main(unique_ptr<kinetic::ConnectionHandle> connection, int argc, char* argv[]) {
     bool success;
 
     if (FLAGS_old_pin.empty()) {
