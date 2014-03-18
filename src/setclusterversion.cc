@@ -11,10 +11,10 @@ using kinetic::KineticRecord;
 
 using std::unique_ptr;
 
-DEFINE_uint64(new_cluster_version, 0, "New cluster version");
+DEFINE_int64(new_cluster_version, 1, "New cluster version");
 
 int example_main(unique_ptr<kinetic::ConnectionHandle> connection, int argc, char* argv[]) {
-    printf("Setting cluster version of to %" PRIu64 "\n", FLAGS_new_cluster_version);
+    printf("Setting cluster version to %" PRId64 "\n", FLAGS_new_cluster_version);
 
     if (!(connection->blocking().SetClusterVersion(FLAGS_new_cluster_version).ok())) {
         printf("Unable to set cluster version\n");
@@ -22,6 +22,18 @@ int example_main(unique_ptr<kinetic::ConnectionHandle> connection, int argc, cha
     }
 
     printf("Finished setting cluster version\n");
+
+    // this is not the right cluster version, so the get should fail
+    connection->blocking().SetClientClusterVersion(FLAGS_new_cluster_version + 1);
+
+    unique_ptr<KineticRecord> result = unique_ptr<KineticRecord>();
+    kinetic::StatusCode code = connection->blocking().Get("foo", result).statusCode();
+    if (code != kinetic::StatusCode::REMOTE_CLUSTER_VERSION_MISMATCH) {
+        printf("Unexpectedly got %d\n", static_cast<int>(code));
+        return 1;
+    } else {
+        printf("Correctly rejected a GET with incorrect cluster version\n");
+    }
 
     return 0;
 }
