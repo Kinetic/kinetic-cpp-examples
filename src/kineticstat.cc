@@ -4,6 +4,7 @@
 #include <stdio.h>
 
 #include "kinetic/kinetic.h"
+#include "gflags/gflags.h"
 
 using kinetic::DriveLog;
 using kinetic::Capacity;
@@ -18,32 +19,11 @@ void print_temp_report(const DriveLog& drive_log, bool print_headers);
 void print_utilization_report(const DriveLog& drive_log, bool print_headers);
 void print_operation_stats_report(const DriveLog& drive_log, bool print_headers);
 
-int main(int argc, char* argv[]) {
-    (void) argc;
+DEFINE_string(type, "all", "Stat type (all|log|temp|utilization|stat)");
+DEFINE_uint64(interval, 5, "Refresh interval");
 
-    if (argc < 2 || argc > 4) {
-        printf("Usage: %s <host>\n", argv[0]);
-        printf("       %s <host> log", argv[0]);
-        printf("       %s <host> <temp|utilization|stat> <interval>\n", argv[0]);
-        return 1;
-    }
-
-    kinetic::ConnectionOptions options;
-    options.host = std::string(argv[1]);
-    options.port = 8123;
-    options.user_id = 1;
-    options.hmac_key = "asdfasdf";
-
-    kinetic::KineticConnectionFactory kinetic_connection_factory = kinetic::NewKineticConnectionFactory();
-
-    unique_ptr<kinetic::ConnectionHandle> connection;
-    if(!kinetic_connection_factory.NewConnection(options, 5, connection).ok()) {
-        printf("Unable to connect\n");
-        return 1;
-    }
-
-    if (argc == 2) {
-        // User just specified host so dump everything
+int example_main(std::unique_ptr<kinetic::ConnectionHandle> connection, int argc, char** argv) {
+    if (FLAGS_type == "all") {
         unique_ptr<DriveLog> drive_log;
         if(!connection->blocking().GetLog(drive_log).ok()) {
             printf("Unable to get log\n");
@@ -51,8 +31,7 @@ int main(int argc, char* argv[]) {
         }
 
         dump_all_information(*drive_log);
-    } else if(argc == 3) {
-        // User wants the logs
+    } else if (FLAGS_type == "log") {
         unique_ptr<DriveLog> drive_log;
         if(!connection->blocking().GetLog(drive_log).ok()) {
             printf("Unable to get log\n");
@@ -61,10 +40,6 @@ int main(int argc, char* argv[]) {
 
         printf("%s\n", drive_log->messages.c_str());
     } else {
-        // User wants to poll host so figure out the information so start
-        // the polling
-        std::string report_type(argv[2]);
-        int report_interval = atoi(argv[3]);
         int report_number = 0;
         while (true) {
             unique_ptr<DriveLog> drive_log;
@@ -75,17 +50,17 @@ int main(int argc, char* argv[]) {
 
             bool print_headers = report_number % 5 == 0;
 
-            if (report_type == "temp") {
+            if (FLAGS_type == "temp") {
                 print_temp_report(*drive_log, print_headers);
-            } else if (report_type == "utilization") {
+            } else if (FLAGS_type == "utilization") {
                 print_utilization_report(*drive_log, print_headers);
-            } else if (report_type == "stat") {
+            } else if (FLAGS_type == "stat") {
                 print_operation_stats_report(*drive_log, print_headers);
             }
 
             printf("\n");
 
-            sleep(report_interval);
+            sleep(FLAGS_interval);
             report_number++;
         }
     }
