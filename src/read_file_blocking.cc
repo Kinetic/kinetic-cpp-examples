@@ -15,35 +15,18 @@ using kinetic::KineticStatus;
 
 using std::unique_ptr;
 
-int main(int argc, char* argv[]) {
-    google::InitGoogleLogging(argv[0]);
+DEFINE_string(output_file_name, "", "Output file name");
+DEFINE_string(kinetic_key, "", "Kinetic key");
 
-    if (argc != 4) {
-        printf("%s: <host> <kinetic key> <output file name>\n", argv[0]);
+int example_main(unique_ptr<kinetic::ConnectionHandle> connection, int argc, char* argv[]) {
+
+    if (FLAGS_output_file_name.size() == 0) {
+        printf("Must specify an output file\n");
         return 1;
     }
-
-    const char* host = argv[1];
-    const char* kinetic_key = argv[2];
-    const char* output_file_name = argv[3];
-
-    kinetic::ConnectionOptions options;
-    options.host = host;
-    options.port = 8123;
-    options.user_id = 1;
-    options.hmac_key = "asdfasdf";
-
-    KineticConnectionFactory kinetic_connection_factory = kinetic::NewKineticConnectionFactory();
-
-    unique_ptr<kinetic::ConnectionHandle> connection;
-    if(!kinetic_connection_factory.NewConnection(options, 5, connection).ok()) {
-        printf("Unable to connect\n");
-        return 1;
-    }
-
 
     std::unique_ptr<KineticRecord> record;
-    KineticStatus get_status = connection->blocking().Get(kinetic_key, record);
+    KineticStatus get_status = connection->blocking().Get(FLAGS_kinetic_key, record);
     if(!get_status.ok()) {
         printf("Unable to get metadata: %s\n", get_status.message().c_str());
         return 1;
@@ -53,7 +36,7 @@ int main(int argc, char* argv[]) {
 
     printf("Reading file of size %zd\n", file_size);
 
-    int file = open(output_file_name, O_RDWR | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);
+    int file = open(FLAGS_output_file_name.c_str(), O_RDWR | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);
     if(!file) {
         printf("Unable to open output file\n");
         return 1;
@@ -74,7 +57,7 @@ int main(int argc, char* argv[]) {
             block_length = file_size - i;
         }
 
-        sprintf(key_buffer, "%s-%10" PRId64, kinetic_key, i);
+        sprintf(key_buffer, "%s-%10" PRId64, FLAGS_kinetic_key.c_str(), i);
         std::string key(key_buffer);
 
         if(!connection->blocking().Get(key, record).ok()) {
@@ -94,12 +77,7 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-
     printf("Done!\n");
-
-    google::protobuf::ShutdownProtobufLibrary();
-    google::ShutdownGoogleLogging();
-    google::ShutDownCommandLineFlags();
 
     return 0;
 }
