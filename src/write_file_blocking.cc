@@ -9,7 +9,7 @@
 
 #include "kinetic/kinetic.h"
 
-using com::seagate::kinetic::proto::Message_Algorithm_SHA1;
+using com::seagate::kinetic::client::proto::Message_Algorithm_SHA1;
 using kinetic::KineticConnectionFactory;
 using kinetic::Status;
 using kinetic::KineticRecord;
@@ -23,6 +23,10 @@ DEFINE_string(local_file, "local_file", "Path of file to store in kinetic");
 
 int example_main(std::unique_ptr<kinetic::ConnectionHandle> connection, int argc, char** argv) {
     int file = open(FLAGS_local_file.c_str(), O_RDONLY);
+    if (file < 0) {
+        printf("Unable to open file %s\n", FLAGS_local_file.c_str());
+        return 1;
+    }
     struct stat inputfile_stat;
     fstat(file, &inputfile_stat);
     char* inputfile_data = (char*)mmap(0, inputfile_stat.st_size, PROT_READ, MAP_SHARED, file, 0);

@@ -82,7 +82,7 @@ void dump_all_information(const DriveLog& drive_log) {
 
     printf("\n");
 
-    printf("Capacity: %.0f bytes remaining / %.0f bytes\n\n",
+    printf("Capacity: %" PRIu64 " bytes remaining / %" PRIu64 " bytes\n\n",
         drive_log.capacity.remaining_bytes, drive_log.capacity.total_bytes);
 
     printf("Statistics:\n");

@@ -8,23 +8,23 @@ using kinetic::KineticConnectionFactory;
 using kinetic::Status;
 using kinetic::KineticRecord;
 using kinetic::ACL;
-using kinetic::Domain;
+using kinetic::Scope;
 
 using std::list;
 using std::make_shared;
 using std::unique_ptr;
 
 int example_main(unique_ptr<kinetic::ConnectionHandle> connection, int argc, char* argv[]) {
-    Domain domain1 = {.offset = 0, .value = "", .roles = {kinetic::GETLOG}};
-    std::list<Domain> acl1_domains = {
-        domain1,
+    Scope scope1 = {.offset = 0, .value = "", .permissions = {kinetic::GETLOG}};
+    std::list<Scope> acl1_scopes = {
+        scope1,
     };
     ACL acl1;
-    acl1.client_id = 1000;
+    acl1.identity = 1000;
     acl1.hmac_key = "foobarbaz";
-    acl1.domains = acl1_domains;
+    acl1.scopes = acl1_scopes;
 
-    Domain domain2 = {.offset = 0, .value = "", .roles = {
+    Scope scope2 = {.offset = 0, .value = "", .permissions = {
             kinetic::READ,
             kinetic::WRITE,
             kinetic::DELETE,
@@ -34,13 +34,13 @@ int example_main(unique_ptr<kinetic::ConnectionHandle> connection, int argc, cha
             kinetic::GETLOG,
             kinetic::SECURITY},
     };
-    std::list<Domain> acl2_domains = {
-        domain2
+    std::list<Scope> acl2_scopes = {
+        scope2
     };
     ACL acl2;
-    acl2.client_id = 1;
+    acl2.identity = 1;
     acl2.hmac_key = "asdfasdf";
-    acl2.domains = acl2_domains;
+    acl2.scopes = acl2_scopes;
 
     auto acls = make_shared<list<ACL>>();
     acls->push_back(acl2);
