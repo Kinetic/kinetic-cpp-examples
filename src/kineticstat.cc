@@ -2,6 +2,7 @@
 
 #include <inttypes.h>
 #include <stdio.h>
+#include <unistd.h>
 
 #include "kinetic/kinetic.h"
 #include "gflags/gflags.h"

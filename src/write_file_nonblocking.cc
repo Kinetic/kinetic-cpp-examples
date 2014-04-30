@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <sys/fcntl.h>
 #include <sys/mman.h>
+#include <sys/stat.h>
 #include <inttypes.h>
 
 #include "kinetic/kinetic.h"
