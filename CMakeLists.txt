@@ -3,7 +3,7 @@ project(kinetic_cpp_client_examples CXX C)
 
 find_package (Threads)
 
-set(CMAKE_CXX_FLAGS "-g --std=c++11 -Wall -Wextra -Werror -Wno-unknown-warning-option -Wno-unused-parameter -Wno-unused-local-typedefs -Wno-null-dereference -DGTEST_USE_OWN_TR1_TUPLE=1 -D__STDC_FORMAT_MACROS")
+set(CMAKE_CXX_FLAGS "--std=c++11 -Wall -Wextra -Werror -Wno-unknown-warning-option -Wno-unused-parameter -Wno-unused-local-typedefs -Wno-null-dereference -DGTEST_USE_OWN_TR1_TUPLE=1 -D__STDC_FORMAT_MACROS")
 
 set(GENERATED_SOURCES_PATH ${kinetic_cpp_client_SOURCE_DIR}/src/main/generated)
 
@@ -12,13 +12,13 @@ include(ExternalProject)
 option(USE_LOCAL_KINETIC_CLIENT "Uses the kinetic client at the KINETIC_CLIENT_PATH variable instead of downloading library from Git" off)
 if(USE_LOCAL_KINETIC_CLIENT)
 else(USE_LOCAL_KINETIC_CLIENT)
-    set(KINETIC_CLIENT_PATH "${kinetic_cpp_client_examples_SOURCE_DIR}/vendor/src/kinetic_cpp_client")
+    set(KINETIC_CLIENT_PATH "${CMAKE_BINARY_DIR}/vendor/src/kinetic_cpp_client")
 
     ExternalProject_add(
         kinetic_cpp_client
         PREFIX "vendor"
-        GIT_REPOSITORY "git@github.com:Seagate/Kinetic-C-Client.git"
-        GIT_TAG "d8661408a946a5afd747d7d6d45784142f4b84a2"
+        GIT_REPOSITORY "git@github.com:Seagate/kinetic-cpp-client.git"
+        GIT_TAG "71a3efd497d6a8cd891f6962a62b3e4fde1c69c4"
         BUILD_IN_SOURCE 1
         INSTALL_COMMAND ""
     )
@@ -56,13 +56,6 @@ macro(add_example_target NAME USE_EXAMPLE_MAIN)
 
     target_link_libraries(${NAME} ${LIBRARY_DEPENDENCIES})
     add_dependencies(${NAME} kinetic_cpp_client)
-
-    set_target_properties( ${NAME} PROPERTIES
-        RUNTIME_OUTPUT_DIRECTORY_DEBUG   ${CMAKE_SOURCE_DIR}
-        RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_SOURCE_DIR}
-        ARCHIVE_OUTPUT_DIRECTORY_DEBUG ${CMAKE_SOURCE_DIR}
-        ARCHIVE_OUTPUT_DIRECTORY_RELEASE ${CMAKE_SOURCE_DIR}
-    )
 endmacro(add_example_target)
 
 add_example_target(kineticstat true)
