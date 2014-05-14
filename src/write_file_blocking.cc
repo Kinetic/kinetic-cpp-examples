@@ -31,7 +31,6 @@
 #include "kinetic/kinetic.h"
 
 using com::seagate::kinetic::client::proto::Message_Algorithm_SHA1;
-using kinetic::KineticConnectionFactory;
 using kinetic::Status;
 using kinetic::KineticRecord;
 
@@ -42,7 +41,11 @@ using std::to_string;
 DEFINE_string(kinetic_key, "my_file", "Key prefix for storing file chunks");
 DEFINE_string(local_file, "local_file", "Path of file to store in kinetic");
 
-int example_main(std::unique_ptr<kinetic::ConnectionHandle> connection, int argc, char** argv) {
+int example_main(
+        std::shared_ptr<kinetic::NonblockingKineticConnection> nonblocking_connection,
+        std::shared_ptr<kinetic::BlockingKineticConnection> blocking_connection,
+        int argc,
+        char** argv) {
     int file = open(FLAGS_local_file.c_str(), O_RDONLY);
     if (file < 0) {
         printf("Unable to open file %s\n", FLAGS_local_file.c_str());
@@ -62,7 +65,7 @@ int example_main(std::unique_ptr<kinetic::ConnectionHandle> connection, int argc
 
         std::string key(key_buffer);
         std::string value(inputfile_data + i, value_size);
-        if(!connection->blocking().Put(
+        if(!blocking_connection->Put(
                 key,
                 "",
                 kinetic::IGNORE_VERSION,
@@ -76,7 +79,7 @@ int example_main(std::unique_ptr<kinetic::ConnectionHandle> connection, int argc
     printf("\n");
 
 
-    if (!connection->blocking().Put(
+    if (!blocking_connection->Put(
             FLAGS_kinetic_key,
             "",
             kinetic::IGNORE_VERSION,

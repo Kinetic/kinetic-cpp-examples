@@ -28,6 +28,7 @@ using kinetic::Status;
 using kinetic::KineticRecord;
 
 using std::shared_ptr;
+using std::make_shared;
 using std::string;
 using std::unique_ptr;
 using std::vector;
@@ -48,11 +49,13 @@ kinetic::P2PPushRequest prepare_request(const vector<kinetic::P2PPushOperation>&
     return request;
 }
 
-void dispatch_request(kinetic::BlockingKineticConnection &connection, const vector<kinetic::P2PPushOperation>& operations, const vector<pair<string, int>>& destinations) {
+void dispatch_request(shared_ptr<kinetic::BlockingKineticConnection> connection,
+        const vector<kinetic::P2PPushOperation>& operations,
+        const vector<pair<string, int>>& destinations) {
     kinetic::P2PPushRequest request = prepare_request(operations, destinations, 0);
 
     unique_ptr<vector<kinetic::KineticStatus>> statuses(new vector<kinetic::KineticStatus>());
-    if (!connection.P2PPush(request, statuses).ok()) {
+    if (!connection->P2PPush(request, statuses).ok()) {
         printf("Error pushing\n");
         exit(1);
     }
@@ -96,8 +99,8 @@ int main(int argc, char* argv[]) {
 
     kinetic::KineticConnectionFactory kinetic_connection_factory = kinetic::NewKineticConnectionFactory();
 
-    unique_ptr<kinetic::ConnectionHandle> connection;
-    if (!kinetic_connection_factory.NewConnection(options, 5, connection).ok()) {
+    shared_ptr<kinetic::BlockingKineticConnection> blocking_connection;
+    if(!kinetic_connection_factory.NewBlockingConnection(options, blocking_connection, 5).ok()){
         printf("Unable to connect\n");
         return 1;
     }
@@ -112,7 +115,7 @@ int main(int argc, char* argv[]) {
     }
 
     // Iterate over all the keys and print them out
-    for (kinetic::KeyRangeIterator it = connection->blocking().IterateKeyRange("", true, last_key, true, 100); it != kinetic::KeyRangeEnd(); ++it) {
+    for (kinetic::KeyRangeIterator it = blocking_connection->IterateKeyRange("", true, last_key, true, 100); it != kinetic::KeyRangeEnd(); ++it) {
         kinetic::P2PPushOperation op;
         op.key = *it;
         op.force = true;
@@ -120,12 +123,12 @@ int main(int argc, char* argv[]) {
         operations.push_back(op);
 
         if (operations.size() > kP2PBatchSize) {
-            dispatch_request(connection->blocking(), operations, destinations);
+            dispatch_request(blocking_connection, operations, destinations);
             operations.clear();
         }
     }
 
-    dispatch_request(connection->blocking(), operations, destinations);
+    dispatch_request(blocking_connection, operations, destinations);
 
     printf("\n");
 

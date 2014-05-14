@@ -38,6 +38,7 @@ using kinetic::NonblockingKineticConnection;
 using kinetic::KineticStatus;
 
 using std::shared_ptr;
+using std::make_shared;
 using std::vector;
 using std::unique_ptr;
 using std::string;
@@ -86,15 +87,17 @@ int main(int argc, char* argv[]) {
 
     KineticConnectionFactory kinetic_connection_factory = kinetic::NewKineticConnectionFactory();
 
-    unique_ptr<kinetic::ConnectionHandle> connection;
-    if(!kinetic_connection_factory.NewConnection(options, 5, connection).ok()) {
+    shared_ptr<kinetic::NonblockingKineticConnection> nonblocking_connection;
+    if (!kinetic_connection_factory.NewNonblockingConnection(options, nonblocking_connection).ok()) {
         printf("Unable to connect\n");
         return 1;
     }
 
+    shared_ptr<kinetic::BlockingKineticConnection> blocking_connection =
+            make_shared<kinetic::BlockingKineticConnection>(nonblocking_connection, 5);
 
     std::unique_ptr<KineticRecord> record;
-    if(!connection->blocking().Get(kinetic_key, record).ok()) {
+    if(!blocking_connection->Get(kinetic_key, record).ok()) {
         printf("Unable to get metadata\n");
         return 1;
     }
@@ -136,12 +139,12 @@ int main(int argc, char* argv[]) {
         sprintf(key_buffer, "%s-%10" PRId64, kinetic_key, i);
         remaining++;
         shared_ptr<Callback> callback(new Callback(output_buffer + i, block_length, &remaining));
-        connection->nonblocking().Get(string(key_buffer), callback);
-        connection->nonblocking().Run(&read_fds, &write_fds, &num_fds);
+        nonblocking_connection->Get(string(key_buffer), callback);
+        nonblocking_connection->Run(&read_fds, &write_fds, &num_fds);
         callbacks.push_back(std::move(callback));
     }
 
-    connection->nonblocking().Run(&read_fds, &write_fds, &num_fds);
+    nonblocking_connection->Run(&read_fds, &write_fds, &num_fds);
     while (remaining > 0) {
         struct timeval tv;
         tv.tv_sec = 10;
@@ -157,7 +160,7 @@ int main(int argc, char* argv[]) {
             return 1;
         }
 
-        connection->nonblocking().Run(&read_fds, &write_fds, &num_fds);
+        nonblocking_connection->Run(&read_fds, &write_fds, &num_fds);
     }
 
     CHECK(!close(file));

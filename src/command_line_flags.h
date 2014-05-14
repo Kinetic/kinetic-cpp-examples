@@ -31,7 +31,10 @@ DEFINE_uint64(timeout, 30, "Timeout");
 DEFINE_uint64(user_id, 1, "Kinetic User ID");
 DEFINE_string(hmac_key, "asdfasdf", "Kinetic User HMAC key");
 
-bool parse_flags(int *argc, char*** argv, std::unique_ptr<kinetic::ConnectionHandle>& connection) {
+bool parse_flags(int *argc,
+        char*** argv,
+        std::shared_ptr<kinetic::NonblockingKineticConnection>& nonblocking_connection,
+        std::shared_ptr<kinetic::BlockingKineticConnection>& blocking_connection) {
     google::ParseCommandLineFlags(argc, argv, true);
 
     kinetic::ConnectionOptions options;
@@ -42,10 +45,11 @@ bool parse_flags(int *argc, char*** argv, std::unique_ptr<kinetic::ConnectionHan
 
     kinetic::KineticConnectionFactory kinetic_connection_factory = kinetic::NewKineticConnectionFactory();
 
-    if (!kinetic_connection_factory.NewConnection(options, FLAGS_timeout, connection).ok()) {
+    if (!kinetic_connection_factory.NewNonblockingConnection(options, nonblocking_connection).ok()) {
         printf("Unable to connect\n");
         return false;
     }
+    blocking_connection = std::make_shared<kinetic::BlockingKineticConnection>(nonblocking_connection, FLAGS_timeout);
 
     return true;
 }

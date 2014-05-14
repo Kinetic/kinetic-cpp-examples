@@ -40,7 +40,6 @@ using kinetic::Status;
 using kinetic::KineticStatus;
 using kinetic::KineticRecord;
 using kinetic::ConnectionOptions;
-using kinetic::ConnectionHandle;
 
 using std::make_shared;
 using std::move;
@@ -52,7 +51,7 @@ using std::vector;
 using std::thread;
 
 void put_range(int64_t start, int64_t end, int64_t total_size, const char* kinetic_key,
-        const char* input_file_name, shared_ptr<ConnectionHandle> handle);
+        const char* input_file_name, shared_ptr<kinetic::BlockingKineticConnection> blocking_connection);
 
 int main(int argc, char* argv[]) {
     google::InitGoogleLogging(argv[0]);
@@ -74,13 +73,11 @@ int main(int argc, char* argv[]) {
 
     KineticConnectionFactory kinetic_connection_factory = kinetic::NewKineticConnectionFactory();
 
-    unique_ptr<kinetic::ConnectionHandle> handle_uniq;
-    if (!kinetic_connection_factory.NewThreadsafeConnection(options, 5, handle_uniq).ok()) {
+    shared_ptr<kinetic::BlockingKineticConnection> blocking_connection;
+    if (!kinetic_connection_factory.NewThreadsafeBlockingConnection(options, blocking_connection, 5).ok()) {
         printf("Unable to connect\n");
         return 1;
     }
-
-    shared_ptr<ConnectionHandle> handle(move(handle_uniq));
 
     int file = open(input_file_name, O_RDONLY);
     struct stat inputfile_stat;
@@ -102,7 +99,7 @@ int main(int argc, char* argv[]) {
             end = inputfile_stat.st_size;
         }
         unique_ptr<thread> t(new thread(put_range, i, end, inputfile_stat.st_size, kinetic_key,
-                    input_file_name, handle));
+                    input_file_name, blocking_connection));
         threads.push_back(move(t));
     }
 
@@ -114,7 +111,7 @@ int main(int argc, char* argv[]) {
 
     printf("All threads joined\n");
 
-    if (!handle->blocking().Put(
+    if (!blocking_connection->Put(
             kinetic_key,
             "",
             kinetic::IGNORE_VERSION,
@@ -133,7 +130,7 @@ int main(int argc, char* argv[]) {
 }
 
 void put_range(int64_t start, int64_t end, int64_t total_size, const char* kinetic_key,
-        const char* input_file_name, shared_ptr<kinetic::ConnectionHandle> handle) {
+        const char* input_file_name, shared_ptr<kinetic::BlockingKineticConnection> blocking_connection) {
     printf("thread writing %" PRId64 " to %" PRId64 "\n", start, end);
 
     int file = open(input_file_name, O_RDONLY);
@@ -151,7 +148,7 @@ void put_range(int64_t start, int64_t end, int64_t total_size, const char* kinet
 
         std::string key(key_buffer);
         std::string value(inputfile_data + i, value_size);
-        KineticStatus status = handle->blocking().Put(
+        KineticStatus status = blocking_connection->Put(
                     key,
                     "",
                     kinetic::IGNORE_VERSION,

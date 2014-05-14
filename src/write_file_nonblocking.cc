@@ -31,7 +31,6 @@
 #include "glog/logging.h"
 
 using com::seagate::kinetic::client::proto::Message_Algorithm_SHA1;
-using kinetic::KineticConnectionFactory;
 using kinetic::Status;
 using kinetic::KineticRecord;
 using kinetic::PutCallbackInterface;
@@ -60,7 +59,12 @@ DEFINE_string(kinetic_key, "my_file", "Key prefix for storing file chunks");
 DEFINE_string(local_file, "local_file", "Path of file to store in kinetic");
 
 
-int example_main(std::unique_ptr<kinetic::ConnectionHandle> connection, int argc, char** argv) {
+int example_main(
+        std::shared_ptr<kinetic::NonblockingKineticConnection> nonblocking_connection,
+        std::shared_ptr<kinetic::BlockingKineticConnection> blocking_connection,
+        int argc,
+        char** argv) {
+
     int file = open(FLAGS_local_file.c_str(), O_RDONLY);
 
     if (file < 0) {
@@ -91,19 +95,19 @@ int example_main(std::unique_ptr<kinetic::ConnectionHandle> connection, int argc
 
         auto record = make_shared<KineticRecord>(value, "", "", Message_Algorithm_SHA1);
         remaining++;
-        connection->nonblocking().Put(key, "", kinetic::IGNORE_VERSION, record, callback);
-        connection->nonblocking().Run(&read_fds, &write_fds, &num_fds);
+        nonblocking_connection->Put(key, "", kinetic::IGNORE_VERSION, record, callback);
+        nonblocking_connection->Run(&read_fds, &write_fds, &num_fds);
     }
 
     auto record = make_shared<KineticRecord>(std::to_string(inputfile_stat.st_size), "", "", Message_Algorithm_SHA1);
     remaining++;
 
-    connection->nonblocking().Put(FLAGS_kinetic_key.c_str(), "", kinetic::IGNORE_VERSION, record, callback);
+    nonblocking_connection->Put(FLAGS_kinetic_key.c_str(), "", kinetic::IGNORE_VERSION, record, callback);
 
-    connection->nonblocking().Run(&read_fds, &write_fds, &num_fds);
+    nonblocking_connection->Run(&read_fds, &write_fds, &num_fds);
     while (remaining > 0) {
         while (select(num_fds + 1, &read_fds, &write_fds, NULL, NULL) <= 0);
-        connection->nonblocking().Run(&read_fds, &write_fds, &num_fds);
+        nonblocking_connection->Run(&read_fds, &write_fds, &num_fds);
     }
 
     if (close(file)) {

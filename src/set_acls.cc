@@ -24,7 +24,6 @@
 
 #include "kinetic/kinetic.h"
 
-using kinetic::KineticConnectionFactory;
 using kinetic::Status;
 using kinetic::KineticRecord;
 using kinetic::ACL;
@@ -34,7 +33,11 @@ using std::list;
 using std::make_shared;
 using std::unique_ptr;
 
-int example_main(unique_ptr<kinetic::ConnectionHandle> connection, int argc, char* argv[]) {
+int example_main(
+        std::shared_ptr<kinetic::NonblockingKineticConnection> nonblocking_connection,
+        std::shared_ptr<kinetic::BlockingKineticConnection> blocking_connection,
+        int argc,
+        char** argv) {
     Scope scope1 = {.offset = 0, .value = "", .permissions = {kinetic::GETLOG}};
     std::list<Scope> acl1_scopes = {
         scope1,
@@ -68,7 +71,7 @@ int example_main(unique_ptr<kinetic::ConnectionHandle> connection, int argc, cha
 
     printf("Setting ACLs...");
 
-    if (connection->blocking().SetACLs(acls).ok()) {
+    if (blocking_connection->SetACLs(acls).ok()) {
         printf("Success!\n");
         return 0;
     } else {
