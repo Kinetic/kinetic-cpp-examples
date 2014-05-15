@@ -41,6 +41,11 @@ int main(int argc, char** argv) {
 
     int ret = example_main(nonblocking_connection, blocking_connection, argc, argv);
 
+    // Manually reset connections before shutting down logging to avoid logging to
+    // an uninitialized logger from a destructor
+    nonblocking_connection.reset();
+    blocking_connection.reset();
+
     google::protobuf::ShutdownProtobufLibrary();
     google::ShutdownGoogleLogging();
     google::ShutDownCommandLineFlags();
