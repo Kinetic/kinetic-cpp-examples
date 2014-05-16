@@ -51,14 +51,14 @@ int main(int argc, char* argv[]) {
 
     KineticConnectionFactory kinetic_connection_factory = kinetic::NewKineticConnectionFactory();
 
-    unique_ptr<kinetic::ConnectionHandle> connection;
-    if(!kinetic_connection_factory.NewConnection(options, 5, connection).ok()) {
+    unique_ptr<kinetic::BlockingKineticConnection> blocking_connection;
+    if (!kinetic_connection_factory.NewBlockingConnection(options, blocking_connection, 5).ok()) {
         printf("Unable to connect\n");
         return 1;
     }
 
     std::unique_ptr<KineticRecord> record;
-    if(!connection->blocking().Get(kinetic_key, record).ok()) {
+    if(!blocking_connection->Get(kinetic_key, record).ok()) {
         printf("Unable to get metadata\n");
         return 1;
     }
@@ -75,7 +75,7 @@ int main(int argc, char* argv[]) {
 
         sprintf(key_buffer, "%s-%10" PRId64, kinetic_key, i);
         std::string key(key_buffer);
-        if (connection->blocking().Delete(key, "", kinetic::IGNORE_VERSION).ok()) {
+        if (blocking_connection->Delete(key, "", kinetic::IGNORE_VERSION).ok()) {
             printf(".");
         } else {
             printf("X");
@@ -83,7 +83,7 @@ int main(int argc, char* argv[]) {
         fflush(stdout);
     }
 
-    if (!connection->blocking().Delete(kinetic_key, "", kinetic::IGNORE_VERSION).ok()) {
+    if (!blocking_connection->Delete(kinetic_key, "", kinetic::IGNORE_VERSION).ok()) {
         printf("Unable to delete metadata\n");
     }
 

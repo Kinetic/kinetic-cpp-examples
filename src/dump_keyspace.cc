@@ -28,9 +28,8 @@ using kinetic::KineticConnectionFactory;
 using kinetic::Status;
 using kinetic::KineticRecord;
 
-using std::shared_ptr;
-using std::string;
 using std::unique_ptr;
+using std::string;
 
 int main(int argc, char* argv[]) {
     if (argc != 3) {
@@ -49,8 +48,8 @@ int main(int argc, char* argv[]) {
 
     kinetic::KineticConnectionFactory kinetic_connection_factory = kinetic::NewKineticConnectionFactory();
 
-    unique_ptr<kinetic::ConnectionHandle> connection;
-    if (!kinetic_connection_factory.NewConnection(options, 5, connection).ok()) {
+    unique_ptr<kinetic::BlockingKineticConnection> blocking_connection;
+    if (!kinetic_connection_factory.NewBlockingConnection(options, blocking_connection, 5).ok()) {
         printf("Unable to connect\n");
         return 1;
     }
@@ -63,7 +62,7 @@ int main(int argc, char* argv[]) {
     }
 
     // Iterate over all the keys and print them out
-    for (kinetic::KeyRangeIterator it = connection->blocking().IterateKeyRange("", true, last_key, true, 100); it != kinetic::KeyRangeEnd(); ++it) {
+    for (kinetic::KeyRangeIterator it = blocking_connection->IterateKeyRange("", true, last_key, true, 100); it != kinetic::KeyRangeEnd(); ++it) {
         printf("%s\n", it->c_str());
     }
 

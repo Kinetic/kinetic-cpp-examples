@@ -25,7 +25,6 @@
 #include "kinetic/kinetic.h"
 #include "gflags/gflags.h"
 
-using kinetic::KineticConnectionFactory;
 using kinetic::Status;
 using kinetic::KineticRecord;
 
@@ -36,14 +35,18 @@ using std::unique_ptr;
 DEFINE_string(new_pin, "", "New PIN");
 DEFINE_string(old_pin, "", "Old PIN");
 
-int example_main(unique_ptr<kinetic::ConnectionHandle> connection, int argc, char* argv[]) {
+int example_main(
+        std::shared_ptr<kinetic::NonblockingKineticConnection> nonblocking_connection,
+        std::shared_ptr<kinetic::BlockingKineticConnection> blocking_connection,
+        int argc,
+        char** argv) {
     bool success;
 
     if (FLAGS_old_pin.empty()) {
-        success = connection->blocking().SetPin(make_shared<string>(FLAGS_new_pin)).ok();
+        success = blocking_connection->SetPin(make_shared<string>(FLAGS_new_pin)).ok();
     } else {
         auto pin = make_shared<string>(FLAGS_old_pin);
-        success = connection->blocking().SetPin(make_shared<string>(FLAGS_new_pin), pin).ok();
+        success = blocking_connection->SetPin(make_shared<string>(FLAGS_new_pin), pin).ok();
     }
 
     if (success) {

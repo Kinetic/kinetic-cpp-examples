@@ -28,7 +28,6 @@
 #include "kinetic/kinetic.h"
 #include "glog/logging.h"
 
-using kinetic::KineticConnectionFactory;
 using kinetic::Status;
 using kinetic::KineticRecord;
 using kinetic::KineticStatus;
@@ -38,7 +37,11 @@ using std::unique_ptr;
 DEFINE_string(output_file_name, "", "Output file name");
 DEFINE_string(kinetic_key, "", "Kinetic key");
 
-int example_main(unique_ptr<kinetic::ConnectionHandle> connection, int argc, char* argv[]) {
+int example_main(
+        std::shared_ptr<kinetic::NonblockingKineticConnection> nonblocking_connection,
+        std::shared_ptr<kinetic::BlockingKineticConnection> blocking_connection,
+        int argc,
+        char** argv) {
 
     if (FLAGS_output_file_name.size() == 0) {
         printf("Must specify an output file\n");
@@ -46,7 +49,7 @@ int example_main(unique_ptr<kinetic::ConnectionHandle> connection, int argc, cha
     }
 
     std::unique_ptr<KineticRecord> record;
-    KineticStatus get_status = connection->blocking().Get(FLAGS_kinetic_key, record);
+    KineticStatus get_status = blocking_connection->Get(FLAGS_kinetic_key, record);
     if(!get_status.ok()) {
         printf("Unable to get metadata: %s\n", get_status.message().c_str());
         return 1;
@@ -80,7 +83,7 @@ int example_main(unique_ptr<kinetic::ConnectionHandle> connection, int argc, cha
         sprintf(key_buffer, "%s-%10" PRId64, FLAGS_kinetic_key.c_str(), i);
         std::string key(key_buffer);
 
-        if(!connection->blocking().Get(key, record).ok()) {
+        if(!blocking_connection->Get(key, record).ok()) {
             printf("Unable to get chunk\n");
             return 1;
         }

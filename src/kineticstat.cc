@@ -43,10 +43,14 @@ void print_operation_stats_report(const DriveLog& drive_log, bool print_headers)
 DEFINE_string(type, "all", "Stat type (all|log|temp|utilization|stat)");
 DEFINE_uint64(interval, 5, "Refresh interval");
 
-int example_main(std::unique_ptr<kinetic::ConnectionHandle> connection, int argc, char** argv) {
+int example_main(
+        std::shared_ptr<kinetic::NonblockingKineticConnection> nonblocking_connection,
+        std::shared_ptr<kinetic::BlockingKineticConnection> blocking_connection,
+        int argc,
+        char** argv) {
     if (FLAGS_type == "all") {
         unique_ptr<DriveLog> drive_log;
-        if(!connection->blocking().GetLog(drive_log).ok()) {
+        if(!blocking_connection->GetLog(drive_log).ok()) {
             printf("Unable to get log\n");
             return 1;
         }
@@ -54,7 +58,7 @@ int example_main(std::unique_ptr<kinetic::ConnectionHandle> connection, int argc
         dump_all_information(*drive_log);
     } else if (FLAGS_type == "log") {
         unique_ptr<DriveLog> drive_log;
-        if(!connection->blocking().GetLog(drive_log).ok()) {
+        if(!blocking_connection->GetLog(drive_log).ok()) {
             printf("Unable to get log\n");
             return 1;
         }
@@ -64,7 +68,7 @@ int example_main(std::unique_ptr<kinetic::ConnectionHandle> connection, int argc
         int report_number = 0;
         while (true) {
             unique_ptr<DriveLog> drive_log;
-            if(!connection->blocking().GetLog(drive_log).ok()) {
+            if(!blocking_connection->GetLog(drive_log).ok()) {
                 printf("Unable to get log\n");
                 return 1;
             }

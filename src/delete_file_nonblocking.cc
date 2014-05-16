@@ -35,6 +35,7 @@ using kinetic::Status;
 using std::make_shared;
 using std::string;
 using std::unique_ptr;
+using std::shared_ptr;
 
 class DeleteCallback : public SimpleCallbackInterface {
 public:
@@ -73,14 +74,16 @@ int main(int argc, char* argv[]) {
 
     KineticConnectionFactory kinetic_connection_factory = kinetic::NewKineticConnectionFactory();
 
-    unique_ptr<kinetic::ConnectionHandle> connection;
-    if(!kinetic_connection_factory.NewConnection(options, 5, connection).ok()) {
+    shared_ptr<kinetic::NonblockingKineticConnection> nonblocking_connection;
+    if (!kinetic_connection_factory.NewNonblockingConnection(options, nonblocking_connection).ok()) {
         printf("Unable to connect\n");
         return 1;
     }
+    shared_ptr<kinetic::BlockingKineticConnection> blocking_connection =
+            make_shared<kinetic::BlockingKineticConnection>(nonblocking_connection, 5);
 
     std::unique_ptr<KineticRecord> record;
-    if(!connection->blocking().Get(string(kinetic_key), record).ok()) {
+    if(!blocking_connection->Get(string(kinetic_key), record).ok()) {
         printf("Unable to get metadata\n");
         return 1;
     }
@@ -100,18 +103,18 @@ int main(int argc, char* argv[]) {
         sprintf(key_buffer, "%s-%10" PRId64, kinetic_key, i);
         remaining++;
         std::string key(key_buffer);
-        connection->nonblocking().Delete(key, "", kinetic::IGNORE_VERSION, callback);
+        nonblocking_connection->Delete(key, "", kinetic::IGNORE_VERSION, callback);
     }
 
     remaining++;
-    connection->nonblocking().Delete(kinetic_key, "", kinetic::IGNORE_VERSION, callback);
+    nonblocking_connection->Delete(kinetic_key, "", kinetic::IGNORE_VERSION, callback);
 
 
     fd_set read_fds, write_fds;
     int num_fds = 0;
-    connection->nonblocking().Run(&read_fds, &write_fds, &num_fds);
+    nonblocking_connection->Run(&read_fds, &write_fds, &num_fds);
     while (remaining > 0) {
-        connection->nonblocking().Run(&read_fds, &write_fds, &num_fds);
+        nonblocking_connection->Run(&read_fds, &write_fds, &num_fds);
     }
 
     printf("\nDone!\n");

@@ -23,17 +23,28 @@
 
 #include "command_line_flags.h"
 
-int example_main(std::unique_ptr<kinetic::ConnectionHandle> connection, int argc, char** argv);
+int example_main(
+        std::shared_ptr<kinetic::NonblockingKineticConnection> nonblocking_connection,
+        std::shared_ptr<kinetic::BlockingKineticConnection> blocking_connection,
+        int argc,
+        char** argv);
 
 int main(int argc, char** argv) {
     google::InitGoogleLogging(argv[0]);
 
-    std::unique_ptr<kinetic::ConnectionHandle> connection;
-    if (!parse_flags(&argc, &argv, connection)) {
+    std::shared_ptr<kinetic::NonblockingKineticConnection> nonblocking_connection;
+    std::shared_ptr<kinetic::BlockingKineticConnection> blocking_connection;
+
+    if (!parse_flags(&argc, &argv, nonblocking_connection, blocking_connection)) {
         return 1;
     }
 
-    int ret = example_main(move(connection), argc, argv);
+    int ret = example_main(nonblocking_connection, blocking_connection, argc, argv);
+
+    // Manually reset connections before shutting down logging to avoid logging to
+    // an uninitialized logger from a destructor
+    nonblocking_connection.reset();
+    blocking_connection.reset();
 
     google::protobuf::ShutdownProtobufLibrary();
     google::ShutdownGoogleLogging();
