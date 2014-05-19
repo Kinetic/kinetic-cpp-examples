@@ -32,6 +32,7 @@ using kinetic::Capacity;
 using kinetic::OperationStatistic;
 using kinetic::Utilization;
 using kinetic::Temperature;
+using kinetic::Limits;
 
 using std::unique_ptr;
 
@@ -109,6 +110,20 @@ void dump_all_information(const DriveLog& drive_log) {
 
     printf("Capacity: %" PRIu64 " bytes remaining / %" PRIu64 " bytes\n\n",
         drive_log.capacity.remaining_bytes, drive_log.capacity.total_bytes);
+
+    printf("\n");
+
+    printf("Limits: \n");
+    printf("  Max Key Size: %d\n", drive_log.limits.max_key_size);
+    printf("  Max Value Size: %d\n", drive_log.limits.max_value_size);
+    printf("  Max Version Size: %d\n", drive_log.limits.max_version_size);
+    printf("  Max Tag Size: %d\n", drive_log.limits.max_tag_size);
+    printf("  Max Connections: %d\n", drive_log.limits.max_connections);
+    printf("  Max Outstanding Read Operations: %d\n", drive_log.limits.max_outstanding_read_requests);
+    printf("  Max Outstanding Write Requests: %d\n", drive_log.limits.max_outstanding_write_requests);
+    printf("  Max Message Size: %d\n", drive_log.limits.max_message_size);
+
+    printf("\n");
 
     printf("Statistics:\n");
     for (auto it = drive_log.operation_statistics.begin();
