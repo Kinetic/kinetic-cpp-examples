@@ -103,11 +103,16 @@ int main(int argc, char* argv[]) {
         sprintf(key_buffer, "%s-%10" PRId64, kinetic_key, i);
         remaining++;
         std::string key(key_buffer);
-        nonblocking_connection->Delete(key, "", kinetic::WriteMode::IGNORE_VERSION, callback);
+        // Use the Write Back persist mode for the data deletes, and then use Flush for the
+        // metadata below to ensure everything is persisted by the time we exit.
+        nonblocking_connection->Delete(key, "", kinetic::WriteMode::IGNORE_VERSION,
+                callback, kinetic::PersistMode::WRITE_BACK);
     }
 
     remaining++;
-    nonblocking_connection->Delete(kinetic_key, "", kinetic::WriteMode::IGNORE_VERSION, callback);
+    // Use the Flush persist mode to make sure all previous deletes are persisted
+    nonblocking_connection->Delete(kinetic_key, "", kinetic::WriteMode::IGNORE_VERSION,
+                callback, kinetic::PersistMode::FLUSH);
 
 
     fd_set read_fds, write_fds;

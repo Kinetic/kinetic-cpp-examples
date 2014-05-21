@@ -95,14 +95,16 @@ int example_main(
 
         auto record = make_shared<KineticRecord>(value, "", "", Message_Algorithm_SHA1);
         remaining++;
-        nonblocking_connection->Put(key, "", kinetic::WriteMode::IGNORE_VERSION, record, callback);
+        nonblocking_connection->Put(key, "", kinetic::WriteMode::IGNORE_VERSION, record,
+                               callback, kinetic::PersistMode::WRITE_BACK);
         nonblocking_connection->Run(&read_fds, &write_fds, &num_fds);
     }
 
     auto record = make_shared<KineticRecord>(std::to_string(inputfile_stat.st_size), "", "", Message_Algorithm_SHA1);
     remaining++;
 
-    nonblocking_connection->Put(FLAGS_kinetic_key.c_str(), "", kinetic::WriteMode::IGNORE_VERSION, record, callback);
+    nonblocking_connection->Put(FLAGS_kinetic_key.c_str(), "", kinetic::WriteMode::IGNORE_VERSION, record,
+                                callback, kinetic::PersistMode::FLUSH);
 
     nonblocking_connection->Run(&read_fds, &write_fds, &num_fds);
     while (remaining > 0) {

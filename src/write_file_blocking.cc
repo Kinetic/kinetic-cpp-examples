@@ -65,11 +65,14 @@ int example_main(
 
         std::string key(key_buffer);
         std::string value(inputfile_data + i, value_size);
+        // Use the Write Back persist mode for the data puts, and then use Flush for the metadata
+        // below to ensure everything is persisted by the time we exit.
         if(!blocking_connection->Put(
                 key,
                 "",
                 kinetic::WriteMode::IGNORE_VERSION,
-                KineticRecord(value, "", "", Message_Algorithm_SHA1)).ok()) {
+                KineticRecord(value, "", "", Message_Algorithm_SHA1),
+                kinetic::PersistMode::WRITE_BACK).ok()) {
             printf("Unable to write a chunk\n");
             return 1;
         }
@@ -79,11 +82,13 @@ int example_main(
     printf("\n");
 
 
+    // Use the Flush persist mode to make sure all previous writes are persisted
     if (!blocking_connection->Put(
             FLAGS_kinetic_key,
             "",
             kinetic::WriteMode::IGNORE_VERSION,
-            KineticRecord(to_string(inputfile_stat.st_size), "", "", Message_Algorithm_SHA1)).ok()) {
+            KineticRecord(to_string(inputfile_stat.st_size), "", "", Message_Algorithm_SHA1),
+            kinetic::PersistMode::FLUSH).ok()) {
         printf("Unable to write metadata\n");
         return 1;
     }
