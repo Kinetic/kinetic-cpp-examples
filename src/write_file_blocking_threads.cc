@@ -114,7 +114,7 @@ int main(int argc, char* argv[]) {
     if (!blocking_connection->Put(
             kinetic_key,
             "",
-            kinetic::IGNORE_VERSION,
+            kinetic::WriteMode::IGNORE_VERSION,
             KineticRecord(std::to_string(inputfile_stat.st_size), "", "", Message_Algorithm_SHA1)).ok()) {
         printf("Unable to write metadata\n");
         return 1;
@@ -151,7 +151,7 @@ void put_range(int64_t start, int64_t end, int64_t total_size, const char* kinet
         KineticStatus status = blocking_connection->Put(
                     key,
                     "",
-                    kinetic::IGNORE_VERSION,
+                    kinetic::WriteMode::IGNORE_VERSION,
                     KineticRecord(value, "", "", Message_Algorithm_SHA1));
         if(!status.ok()) {
             printf("Unable to write chunk: %d %s\n", static_cast<int>(status.statusCode()),

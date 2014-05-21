@@ -18,7 +18,7 @@ else(USE_LOCAL_KINETIC_CLIENT)
         kinetic_cpp_client
         PREFIX "vendor"
         GIT_REPOSITORY "https://github.com/Seagate/kinetic-cpp-client.git"
-        GIT_TAG "161c2b7005c7c2b33e6de8197869efb4454d000b"
+        GIT_TAG "9e8ea1af7f3c3e748c03286549c445683d4d7b22"
         BUILD_IN_SOURCE 1
         INSTALL_COMMAND ""
     )

@@ -68,7 +68,7 @@ int example_main(
         if(!blocking_connection->Put(
                 key,
                 "",
-                kinetic::IGNORE_VERSION,
+                kinetic::WriteMode::IGNORE_VERSION,
                 KineticRecord(value, "", "", Message_Algorithm_SHA1)).ok()) {
             printf("Unable to write a chunk\n");
             return 1;
@@ -82,7 +82,7 @@ int example_main(
     if (!blocking_connection->Put(
             FLAGS_kinetic_key,
             "",
-            kinetic::IGNORE_VERSION,
+            kinetic::WriteMode::IGNORE_VERSION,
             KineticRecord(to_string(inputfile_stat.st_size), "", "", Message_Algorithm_SHA1)).ok()) {
         printf("Unable to write metadata\n");
         return 1;

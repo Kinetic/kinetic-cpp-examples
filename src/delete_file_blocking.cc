@@ -75,7 +75,7 @@ int main(int argc, char* argv[]) {
 
         sprintf(key_buffer, "%s-%10" PRId64, kinetic_key, i);
         std::string key(key_buffer);
-        if (blocking_connection->Delete(key, "", kinetic::IGNORE_VERSION).ok()) {
+        if (blocking_connection->Delete(key, "", kinetic::WriteMode::IGNORE_VERSION).ok()) {
             printf(".");
         } else {
             printf("X");
@@ -83,7 +83,7 @@ int main(int argc, char* argv[]) {
         fflush(stdout);
     }
 
-    if (!blocking_connection->Delete(kinetic_key, "", kinetic::IGNORE_VERSION).ok()) {
+    if (!blocking_connection->Delete(kinetic_key, "", kinetic::WriteMode::IGNORE_VERSION).ok()) {
         printf("Unable to delete metadata\n");
     }
 

@@ -103,11 +103,11 @@ int main(int argc, char* argv[]) {
         sprintf(key_buffer, "%s-%10" PRId64, kinetic_key, i);
         remaining++;
         std::string key(key_buffer);
-        nonblocking_connection->Delete(key, "", kinetic::IGNORE_VERSION, callback);
+        nonblocking_connection->Delete(key, "", kinetic::WriteMode::IGNORE_VERSION, callback);
     }
 
     remaining++;
-    nonblocking_connection->Delete(kinetic_key, "", kinetic::IGNORE_VERSION, callback);
+    nonblocking_connection->Delete(kinetic_key, "", kinetic::WriteMode::IGNORE_VERSION, callback);
 
 
     fd_set read_fds, write_fds;
