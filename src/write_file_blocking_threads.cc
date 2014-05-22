@@ -111,11 +111,13 @@ int main(int argc, char* argv[]) {
 
     printf("All threads joined\n");
 
+    // Use the Flush persist mode to make sure all previous writes are persisted
     if (!blocking_connection->Put(
             kinetic_key,
             "",
-            kinetic::IGNORE_VERSION,
-            KineticRecord(std::to_string(inputfile_stat.st_size), "", "", Message_Algorithm_SHA1)).ok()) {
+            kinetic::WriteMode::IGNORE_VERSION,
+            KineticRecord(std::to_string(inputfile_stat.st_size), "", "", Message_Algorithm_SHA1),
+            kinetic::PersistMode::FLUSH).ok()) {
         printf("Unable to write metadata\n");
         return 1;
     }
@@ -148,11 +150,14 @@ void put_range(int64_t start, int64_t end, int64_t total_size, const char* kinet
 
         std::string key(key_buffer);
         std::string value(inputfile_data + i, value_size);
+        // Use the Write Back persist mode for the data puts, and then use Flush for the metadata
+        // below to ensure everything is persisted by the time we exit.
         KineticStatus status = blocking_connection->Put(
                     key,
                     "",
-                    kinetic::IGNORE_VERSION,
-                    KineticRecord(value, "", "", Message_Algorithm_SHA1));
+                    kinetic::WriteMode::IGNORE_VERSION,
+                    KineticRecord(value, "", "", Message_Algorithm_SHA1),
+                    kinetic::PersistMode::WRITE_BACK);
         if(!status.ok()) {
             printf("Unable to write chunk: %d %s\n", static_cast<int>(status.statusCode()),
                 status.message().c_str());

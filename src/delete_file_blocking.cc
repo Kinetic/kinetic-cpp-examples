@@ -75,7 +75,11 @@ int main(int argc, char* argv[]) {
 
         sprintf(key_buffer, "%s-%10" PRId64, kinetic_key, i);
         std::string key(key_buffer);
-        if (blocking_connection->Delete(key, "", kinetic::IGNORE_VERSION).ok()) {
+
+        // Use the Write Back persist mode for the data deletes, and then use Flush for the
+        // metadata below to ensure everything is persisted by the time we exit.
+        if (blocking_connection->Delete(key, "",
+                kinetic::WriteMode::IGNORE_VERSION, kinetic::PersistMode::WRITE_BACK).ok()) {
             printf(".");
         } else {
             printf("X");
@@ -83,7 +87,9 @@ int main(int argc, char* argv[]) {
         fflush(stdout);
     }
 
-    if (!blocking_connection->Delete(kinetic_key, "", kinetic::IGNORE_VERSION).ok()) {
+    // Use the Flush persist mode to make sure all previous deletes are persisted
+    if (!blocking_connection->Delete(kinetic_key, "",
+            kinetic::WriteMode::IGNORE_VERSION, kinetic::PersistMode::FLUSH).ok()) {
         printf("Unable to delete metadata\n");
     }
 
