@@ -1,7 +1,7 @@
 /*
  * kinetic-cpp-examples
  * Copyright (C) 2014 Seagate Technology.
- * 
+ *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
@@ -26,6 +26,7 @@
 
 #include "kinetic/kinetic.h"
 #include "gflags/gflags.h"
+#include "util.h"
 
 using kinetic::DriveLog;
 using kinetic::Capacity;
@@ -51,28 +52,19 @@ int example_main(
         char** argv) {
     if (FLAGS_type == "all") {
         unique_ptr<DriveLog> drive_log;
-        if(!blocking_connection->GetLog(drive_log).ok()) {
-            printf("Unable to get log\n");
-            return 1;
-        }
+        PerformKineticOpOrExit(blocking_connection->GetLog(drive_log));
 
         dump_all_information(*drive_log);
     } else if (FLAGS_type == "log") {
         unique_ptr<DriveLog> drive_log;
-        if(!blocking_connection->GetLog(drive_log).ok()) {
-            printf("Unable to get log\n");
-            return 1;
-        }
+        PerformKineticOpOrExit(blocking_connection->GetLog(drive_log));
 
         printf("%s\n", drive_log->messages.c_str());
     } else {
         int report_number = 0;
         while (true) {
             unique_ptr<DriveLog> drive_log;
-            if(!blocking_connection->GetLog(drive_log).ok()) {
-                printf("Unable to get log\n");
-                return 1;
-            }
+            PerformKineticOpOrExit(blocking_connection->GetLog(drive_log));
 
             bool print_headers = report_number % 5 == 0;
 
