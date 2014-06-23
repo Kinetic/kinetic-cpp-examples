@@ -18,28 +18,25 @@ else(USE_LOCAL_KINETIC_CLIENT)
         kinetic_cpp_client
         PREFIX "vendor"
         GIT_REPOSITORY "https://github.com/Seagate/kinetic-cpp-client.git"
-        GIT_TAG "ed4e0d3a670145a6ebe7b1b211268b788338b8c3"
+        GIT_TAG "0.0.6"
         BUILD_IN_SOURCE 1
         INSTALL_COMMAND ""
     )
 endif(USE_LOCAL_KINETIC_CLIENT)
 
 include_directories(
-    ${KINETIC_CLIENT_PATH}/vendor/src/protobufutil/vendor/include
-    ${KINETIC_CLIENT_PATH}/vendor/src/protobufutil/include
-    ${KINETIC_CLIENT_PATH}/vendor/src/protobufutil/vendor/src/gmock/fused-src
+    ${KINETIC_CLIENT_PATH}/vendor/include
     ${KINETIC_CLIENT_PATH}/src/main/generated
     ${KINETIC_CLIENT_PATH}/include
 )
 
 set(LIBRARY_DEPENDENCIES
     ${KINETIC_CLIENT_PATH}/libkinetic_client.a
-    ${KINETIC_CLIENT_PATH}/vendor/src/protobufutil/libprotobufutil.a
-    ${KINETIC_CLIENT_PATH}/vendor/src/protobufutil/vendor/lib/libglog.a
-    ${KINETIC_CLIENT_PATH}/vendor/src/protobufutil/vendor/lib/libgflags.a
-    ${KINETIC_CLIENT_PATH}/vendor/src/protobufutil/vendor/lib/libssl.a
-    ${KINETIC_CLIENT_PATH}/vendor/src/protobufutil/vendor/lib/libcrypto.a
-    ${KINETIC_CLIENT_PATH}/vendor/src/protobufutil/vendor/lib/libprotobuf.a
+    ${KINETIC_CLIENT_PATH}/vendor/lib/libglog.a
+    ${KINETIC_CLIENT_PATH}/vendor/lib/libgflags.a
+    ${KINETIC_CLIENT_PATH}/vendor/lib/libssl.a
+    ${KINETIC_CLIENT_PATH}/vendor/lib/libcrypto.a
+    ${KINETIC_CLIENT_PATH}/vendor/lib/libprotobuf.a
     ${CMAKE_THREAD_LIBS_INIT}
     dl
 )
