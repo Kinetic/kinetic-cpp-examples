@@ -1,7 +1,7 @@
 /*
  * kinetic-cpp-examples
  * Copyright (C) 2014 Seagate Technology.
- * 
+ *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
@@ -39,8 +39,13 @@ int example_main(
         char** argv) {
     printf("Setting cluster version to %" PRId64 "\n", FLAGS_new_cluster_version);
 
-    if (!(blocking_connection->SetClusterVersion(FLAGS_new_cluster_version).ok())) {
-        printf("Unable to set cluster version\n");
+    kinetic::KineticStatus status = blocking_connection->SetClusterVersion(FLAGS_new_cluster_version);
+    if (!status.ok()) {
+        printf("Unable to set cluster version");
+        if (status.statusCode() == kinetic::StatusCode::REMOTE_CLUSTER_VERSION_MISMATCH) {
+          printf(". Incorrect cluster version; should be %" PRId64, status.expected_cluster_version());
+        }
+        printf("\n");
         return 1;
     }
 
@@ -50,12 +55,12 @@ int example_main(
     blocking_connection->SetClientClusterVersion(FLAGS_new_cluster_version + 1);
 
     unique_ptr<KineticRecord> result = unique_ptr<KineticRecord>();
-    kinetic::StatusCode code = blocking_connection->Get("foo", result).statusCode();
-    if (code != kinetic::StatusCode::REMOTE_CLUSTER_VERSION_MISMATCH) {
-        printf("Unexpectedly got %d\n", static_cast<int>(code));
+    status = blocking_connection->Get("foo", result);
+    if (status.statusCode() != kinetic::StatusCode::REMOTE_CLUSTER_VERSION_MISMATCH) {
+        printf("Unexpectedly got %d\n", static_cast<int>(status.statusCode()));
         return 1;
     } else {
-        printf("Correctly rejected a GET with incorrect cluster version\n");
+        printf("Correctly rejected a GET with incorrect cluster version; should have sent %" PRId64 "\n", status.expected_cluster_version());
     }
 
     return 0;
