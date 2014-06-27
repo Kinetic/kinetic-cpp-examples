@@ -63,7 +63,7 @@ Toy example demonstrating how to change the ACLs. It always sets a hard-coded se
 -------------------
 Changes the cluster version and verifies that requests with the old cluster version get rejected. Example usage:
 
-    ./setclusterversion -host 127.1 -port 8123 -new_cluster_version 99
+    ./setclusterversion -host 127.1 -port 8123 -cluster_version 0 -new_cluster_version 99
 
 `setpin` (see `src/setpin.cc`)
 --------

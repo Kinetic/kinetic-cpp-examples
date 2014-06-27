@@ -1,7 +1,7 @@
 /*
  * kinetic-cpp-examples
  * Copyright (C) 2014 Seagate Technology.
- * 
+ *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
@@ -30,6 +30,7 @@ DEFINE_uint64(port, 8123, "Kinetic Port");
 DEFINE_uint64(timeout, 30, "Timeout");
 DEFINE_uint64(user_id, 1, "Kinetic User ID");
 DEFINE_string(hmac_key, "asdfasdf", "Kinetic User HMAC key");
+DEFINE_int64(cluster_version, 0, "Kinetic Cluster Version");
 
 bool parse_flags(int *argc,
         char*** argv,
@@ -50,6 +51,7 @@ bool parse_flags(int *argc,
         return false;
     }
     blocking_connection = std::make_shared<kinetic::BlockingKineticConnection>(nonblocking_connection, FLAGS_timeout);
+    blocking_connection->SetClientClusterVersion(FLAGS_cluster_version);
 
     return true;
 }
