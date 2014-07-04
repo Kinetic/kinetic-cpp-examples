@@ -25,7 +25,7 @@
 
 #include "kinetic/kinetic.h"
 
-static const int kP2PBatchSize = 300;
+static const int kP2PBatchSize = 10;
 using kinetic::KineticConnectionFactory;
 using kinetic::Status;
 using kinetic::KineticRecord;
@@ -48,7 +48,7 @@ kinetic::P2PPushRequest prepare_request(const vector<kinetic::P2PPushOperation>&
 
     if (currentDestination < destinations.size() - 1) {
         // Add the pipleline request onto this request's first operation
-        request.operations[0].request = make_shared<::kinetic::P2PPushRequest>(
+        request.operations[request.operations.size() - 1].request = make_shared<::kinetic::P2PPushRequest>(
                 prepare_request(operations, destinations, currentDestination + 1));
     }
 
