@@ -19,6 +19,9 @@
  */
 
 #include <stdio.h>
+#include <stdlib.h>
+#include <memory>
+#include <vector>
 
 #include "kinetic/kinetic.h"
 
@@ -37,14 +40,17 @@ using std::make_pair;
 
 kinetic::P2PPushRequest prepare_request(const vector<kinetic::P2PPushOperation>& operations, const vector<pair<string, int>>& destinations, size_t currentDestination) {
     kinetic::P2PPushRequest request;
-    if (currentDestination < destinations.size() - 1) {
-        request.requests.push_back(prepare_request(operations, destinations, currentDestination + 1));
-    }
 
     request.host = destinations[currentDestination].first;
     request.port = destinations[currentDestination].second;
 
     request.operations = operations;
+
+    if (currentDestination < destinations.size() - 1) {
+        // Add the pipleline request onto this request's first operation
+        request.operations[0].request = make_shared<::kinetic::P2PPushRequest>(
+                prepare_request(operations, destinations, currentDestination + 1));
+    }
 
     return request;
 }
@@ -55,8 +61,9 @@ void dispatch_request(shared_ptr<kinetic::BlockingKineticConnection> connection,
     kinetic::P2PPushRequest request = prepare_request(operations, destinations, 0);
 
     unique_ptr<vector<kinetic::KineticStatus>> statuses(new vector<kinetic::KineticStatus>());
-    if (!connection->P2PPush(request, statuses).ok()) {
-        printf("Error pushing\n");
+    auto status = connection->P2PPush(request, statuses);
+    if (!status.ok()) {
+        printf("Error pushing: %d, %s\n", status.statusCode(), status.message().c_str());
         exit(1);
     }
 
@@ -100,7 +107,7 @@ int main(int argc, char* argv[]) {
     kinetic::KineticConnectionFactory kinetic_connection_factory = kinetic::NewKineticConnectionFactory();
 
     shared_ptr<kinetic::BlockingKineticConnection> blocking_connection;
-    if(!kinetic_connection_factory.NewBlockingConnection(options, blocking_connection, 5).ok()){
+    if(!kinetic_connection_factory.NewBlockingConnection(options, blocking_connection, 20).ok()){
         printf("Unable to connect\n");
         return 1;
     }
