@@ -43,17 +43,17 @@ int example_main(
     bool success;
 
     if (FLAGS_old_pin.empty()) {
-        success = blocking_connection->SetPin(make_shared<string>(FLAGS_new_pin)).ok();
+        success = blocking_connection->SetErasePIN(make_shared<string>(FLAGS_new_pin)).ok();
     } else {
         auto pin = make_shared<string>(FLAGS_old_pin);
-        success = blocking_connection->SetPin(make_shared<string>(FLAGS_new_pin), pin).ok();
+        success = blocking_connection->SetErasePIN(make_shared<string>(FLAGS_new_pin), pin).ok();
     }
 
     if (success) {
-        printf("Finished setting pin\n");
+        printf("Finished setting erase pin\n");
         return 0;
     } else {
-        printf("Unable to change pin\n");
+        printf("Unable to change erase pin\n");
         return 1;
     }
 }
