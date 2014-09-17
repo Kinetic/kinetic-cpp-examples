@@ -16,8 +16,8 @@ else(USE_LOCAL_KINETIC_CLIENT)
     ExternalProject_add(
         kinetic_cpp_client
         PREFIX "vendor"
-        GIT_REPOSITORY "https://github.com/plensing/kinetic-cpp-client.git"
-        GIT_TAG ""
+        GIT_REPOSITORY "https://github.com/Seagate/kinetic-cpp-client.git"
+        GIT_TAG "0.1.1"
         BUILD_IN_SOURCE 1
         INSTALL_COMMAND ""
     )
