@@ -45,14 +45,12 @@ bool parse_flags(int *argc,
     options.hmac_key = FLAGS_hmac_key;
 
     kinetic::KineticConnectionFactory kinetic_connection_factory = kinetic::NewKineticConnectionFactory();
-
-    if (!kinetic_connection_factory.NewNonblockingConnection(options, nonblocking_connection).ok()) {
+    if (!kinetic_connection_factory.NewNonblockingConnection(options, nonblocking_connection).ok() ||
+        !kinetic_connection_factory.NewBlockingConnection(options, blocking_connection, FLAGS_timeout).ok() ){
         printf("Unable to connect\n");
         return false;
     }
-    blocking_connection = std::make_shared<kinetic::BlockingKineticConnection>(nonblocking_connection, FLAGS_timeout);
     blocking_connection->SetClientClusterVersion(FLAGS_cluster_version);
-
     return true;
 }
 

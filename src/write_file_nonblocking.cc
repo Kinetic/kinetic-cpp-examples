@@ -30,7 +30,7 @@
 #include "kinetic/kinetic.h"
 #include "glog/logging.h"
 
-using com::seagate::kinetic::client::proto::Message_Algorithm_SHA1;
+using com::seagate::kinetic::client::proto::Command_Algorithm_SHA1;
 using kinetic::Status;
 using kinetic::KineticRecord;
 using kinetic::PutCallbackInterface;
@@ -93,14 +93,14 @@ int example_main(
         std::string key(key_buffer);
         std::string value(inputfile_data + i, value_size);
 
-        auto record = make_shared<KineticRecord>(value, "", "", Message_Algorithm_SHA1);
+        auto record = make_shared<KineticRecord>(value, "", "", Command_Algorithm_SHA1);
         remaining++;
         nonblocking_connection->Put(key, "", kinetic::WriteMode::IGNORE_VERSION, record,
                                callback, kinetic::PersistMode::WRITE_BACK);
         nonblocking_connection->Run(&read_fds, &write_fds, &num_fds);
     }
 
-    auto record = make_shared<KineticRecord>(std::to_string(inputfile_stat.st_size), "", "", Message_Algorithm_SHA1);
+    auto record = make_shared<KineticRecord>(std::to_string(inputfile_stat.st_size), "", "", Command_Algorithm_SHA1);
     remaining++;
 
     nonblocking_connection->Put(FLAGS_kinetic_key.c_str(), "", kinetic::WriteMode::IGNORE_VERSION, record,

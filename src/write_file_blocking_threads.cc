@@ -33,9 +33,9 @@
 
 #include "kinetic/kinetic.h"
 
-using com::seagate::kinetic::client::proto::Message_Algorithm_SHA1;
+using com::seagate::kinetic::client::proto::Command_Algorithm_SHA1;
 using kinetic::KineticConnectionFactory;
-using kinetic::BlockingKineticConnection;
+using kinetic::ThreadsafeBlockingKineticConnection;
 using kinetic::Status;
 using kinetic::KineticStatus;
 using kinetic::KineticRecord;
@@ -51,7 +51,7 @@ using std::vector;
 using std::thread;
 
 void put_range(int64_t start, int64_t end, int64_t total_size, const char* kinetic_key,
-        const char* input_file_name, shared_ptr<kinetic::BlockingKineticConnection> blocking_connection);
+        const char* input_file_name, shared_ptr<kinetic::ThreadsafeBlockingKineticConnection> blocking_connection);
 
 int main(int argc, char* argv[]) {
     google::InitGoogleLogging(argv[0]);
@@ -73,7 +73,7 @@ int main(int argc, char* argv[]) {
 
     KineticConnectionFactory kinetic_connection_factory = kinetic::NewKineticConnectionFactory();
 
-    shared_ptr<kinetic::BlockingKineticConnection> blocking_connection;
+    shared_ptr<kinetic::ThreadsafeBlockingKineticConnection> blocking_connection;
     if (!kinetic_connection_factory.NewThreadsafeBlockingConnection(options, blocking_connection, 5).ok()) {
         printf("Unable to connect\n");
         return 1;
@@ -116,7 +116,7 @@ int main(int argc, char* argv[]) {
             kinetic_key,
             "",
             kinetic::WriteMode::IGNORE_VERSION,
-            KineticRecord(std::to_string(inputfile_stat.st_size), "", "", Message_Algorithm_SHA1),
+            KineticRecord(std::to_string(inputfile_stat.st_size), "", "", Command_Algorithm_SHA1),
             kinetic::PersistMode::FLUSH).ok()) {
         printf("Unable to write metadata\n");
         return 1;
@@ -132,7 +132,7 @@ int main(int argc, char* argv[]) {
 }
 
 void put_range(int64_t start, int64_t end, int64_t total_size, const char* kinetic_key,
-        const char* input_file_name, shared_ptr<kinetic::BlockingKineticConnection> blocking_connection) {
+        const char* input_file_name, shared_ptr<kinetic::ThreadsafeBlockingKineticConnection> blocking_connection) {
     printf("thread writing %" PRId64 " to %" PRId64 "\n", start, end);
 
     int file = open(input_file_name, O_RDONLY);
@@ -156,7 +156,7 @@ void put_range(int64_t start, int64_t end, int64_t total_size, const char* kinet
                     key,
                     "",
                     kinetic::WriteMode::IGNORE_VERSION,
-                    KineticRecord(value, "", "", Message_Algorithm_SHA1),
+                    KineticRecord(value, "", "", Command_Algorithm_SHA1),
                     kinetic::PersistMode::WRITE_BACK);
         if(!status.ok()) {
             printf("Unable to write chunk: %d %s\n", static_cast<int>(status.statusCode()),

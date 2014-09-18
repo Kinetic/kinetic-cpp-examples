@@ -41,11 +41,19 @@ int example_main(
         char** argv) {
     shared_ptr<string> pin(new string(FLAGS_pin));
 
-    KineticStatus status = blocking_connection->InstantSecureErase(pin);
+    KineticStatus status = blocking_connection->InstantErase(pin);
     bool success = status.ok();
 
     if (!success) {
-        printf("Unable to execute ISE: %d %s\n", static_cast<int>(status.statusCode()), status.message().c_str());
+        printf("Unable to execute InstantErase: %d %s\n", static_cast<int>(status.statusCode()), status.message().c_str());
+        return 1;
+    }
+
+    status = blocking_connection->SecureErase(pin);
+    success = status.ok();
+
+    if (!success) {
+        printf("Unable to execute SecureErase: %d %s\n", static_cast<int>(status.statusCode()), status.message().c_str());
         return 1;
     }
 

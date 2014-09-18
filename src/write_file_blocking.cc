@@ -30,7 +30,7 @@
 
 #include "kinetic/kinetic.h"
 
-using com::seagate::kinetic::client::proto::Message_Algorithm_SHA1;
+using com::seagate::kinetic::client::proto::Command_Algorithm_SHA1;
 using kinetic::Status;
 using kinetic::KineticRecord;
 
@@ -71,7 +71,7 @@ int example_main(
                 key,
                 "",
                 kinetic::WriteMode::IGNORE_VERSION,
-                KineticRecord(value, "", "", Message_Algorithm_SHA1),
+                KineticRecord(value, "", "", Command_Algorithm_SHA1),
                 kinetic::PersistMode::WRITE_BACK).ok()) {
             printf("Unable to write a chunk\n");
             return 1;
@@ -87,7 +87,7 @@ int example_main(
             FLAGS_kinetic_key,
             "",
             kinetic::WriteMode::IGNORE_VERSION,
-            KineticRecord(to_string(inputfile_stat.st_size), "", "", Message_Algorithm_SHA1),
+            KineticRecord(to_string(inputfile_stat.st_size), "", "", Command_Algorithm_SHA1),
             kinetic::PersistMode::FLUSH).ok()) {
         printf("Unable to write metadata\n");
         return 1;

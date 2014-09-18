@@ -13,12 +13,11 @@ option(USE_LOCAL_KINETIC_CLIENT "Uses the kinetic client at the KINETIC_CLIENT_P
 if(USE_LOCAL_KINETIC_CLIENT)
 else(USE_LOCAL_KINETIC_CLIENT)
     set(KINETIC_CLIENT_PATH "${CMAKE_BINARY_DIR}/vendor/src/kinetic_cpp_client")
-
     ExternalProject_add(
         kinetic_cpp_client
         PREFIX "vendor"
         GIT_REPOSITORY "https://github.com/Seagate/kinetic-cpp-client.git"
-        GIT_TAG "0.0.9"
+        GIT_TAG "0.1.1"
         BUILD_IN_SOURCE 1
         INSTALL_COMMAND ""
     )

@@ -29,6 +29,7 @@ static const int kP2PBatchSize = 10;
 using kinetic::KineticConnectionFactory;
 using kinetic::Status;
 using kinetic::KineticRecord;
+using kinetic::P2PPushRequest;
 
 using std::shared_ptr;
 using std::make_shared;
@@ -48,7 +49,7 @@ kinetic::P2PPushRequest prepare_request(const vector<kinetic::P2PPushOperation>&
 
     if (currentDestination < destinations.size() - 1) {
         // Add the pipleline request onto this request's first operation
-        request.operations[request.operations.size() - 1].request = make_shared<::kinetic::P2PPushRequest>(
+        request.operations[request.operations.size() - 1].request = make_shared< P2PPushRequest >(
                 prepare_request(operations, destinations, currentDestination + 1));
     }
 
@@ -129,7 +130,7 @@ int main(int argc, char* argv[]) {
         op.newKey = *it;
         operations.push_back(op);
 
-        if (operations.size() > kP2PBatchSize) {
+        if (operations.size() > (size_t)kP2PBatchSize) {
             dispatch_request(blocking_connection, operations, destinations);
             operations.clear();
         }

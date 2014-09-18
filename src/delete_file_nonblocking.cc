@@ -75,12 +75,12 @@ int main(int argc, char* argv[]) {
     KineticConnectionFactory kinetic_connection_factory = kinetic::NewKineticConnectionFactory();
 
     shared_ptr<kinetic::NonblockingKineticConnection> nonblocking_connection;
-    if (!kinetic_connection_factory.NewNonblockingConnection(options, nonblocking_connection).ok()) {
+    shared_ptr<kinetic::BlockingKineticConnection> blocking_connection;
+    if (!kinetic_connection_factory.NewNonblockingConnection(options, nonblocking_connection).ok() ||
+        !kinetic_connection_factory.NewBlockingConnection(options, blocking_connection, 10).ok() ){
         printf("Unable to connect\n");
         return 1;
     }
-    shared_ptr<kinetic::BlockingKineticConnection> blocking_connection =
-            make_shared<kinetic::BlockingKineticConnection>(nonblocking_connection, 5);
 
     std::unique_ptr<KineticRecord> record;
     if(!blocking_connection->Get(string(kinetic_key), record).ok()) {
