@@ -39,6 +39,15 @@ set(LIBRARY_DEPENDENCIES
     ${CMAKE_THREAD_LIBS_INIT}
     dl
 )
+# If libunwind is installed it is used by glog and thus has to linked. 
+# Otherwise glog uses the standard glibc unwinder and there is no dependency.
+find_library(LIBUNWIND "unwind")
+if(LIBUNWIND)
+    set(LIBRARY_DEPENDENCIES 
+        ${LIBRARY_DEPENDENCIES} 
+        ${LIBUNWIND}
+    )
+endif()
 
 macro(add_example_target NAME USE_EXAMPLE_MAIN)
     if(${USE_EXAMPLE_MAIN})
