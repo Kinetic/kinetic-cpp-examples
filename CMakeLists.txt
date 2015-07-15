@@ -9,7 +9,7 @@ set(GENERATED_SOURCES_PATH ${kinetic_cpp_client_SOURCE_DIR}/src/main/generated)
 
 include(ExternalProject)
 
-option(USE_LOCAL_KINETIC_CLIENT "Uses the kinetic client at the KINETIC_CLIENT_PATH variable instead of downloading library from Git" off)
+option(USE_LOCAL_KINETIC_CLIENT "Uses the kinetic client at the KINETIC_CLIENT_PATH variable instead of downloading library from Git" on)
 if(USE_LOCAL_KINETIC_CLIENT)
 else(USE_LOCAL_KINETIC_CLIENT)
     set(KINETIC_CLIENT_PATH "${CMAKE_BINARY_DIR}/vendor/src/kinetic_cpp_client")
@@ -17,7 +17,7 @@ else(USE_LOCAL_KINETIC_CLIENT)
         kinetic_cpp_client
         PREFIX "vendor"
         GIT_REPOSITORY "https://github.com/Seagate/kinetic-cpp-client.git"
-        GIT_TAG "0.1.1"
+        GIT_TAG "develop"
         BUILD_IN_SOURCE 1
         INSTALL_COMMAND ""
     )
@@ -78,3 +78,5 @@ add_example_target(firmware_update false)
 add_example_target(write_file_blocking_threads false)
 add_example_target(dump_keyspace false)
 add_example_target(copydrive false)
+add_example_target(media_scan_blocking true)
+add_example_target(media_optimize_blocking true)
