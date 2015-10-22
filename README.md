@@ -70,6 +70,18 @@ Changes the cluster version and verifies that requests with the old cluster vers
 Allows changing a drive's PIN. For instance:
 
     ./setpin -host 127.1 -port 8123 -new_pin 1234 -old_pin 5678
+    
+`media_scan_blocking` (see `src/media_scan_blocking.cc`)
+--------
+Performs media scan with the specified range and priority. For instance:
+
+    ./media_scan_blocking -host 127.1 -port 8123 -start_key key000 -end_key key999 -start_key_inclusive true -end_key_inclusive true
+    
+`media_optimize_blocking` (see `src/media_optimize_blocking.cc`)
+--------
+Performs media optimize with the specified range and priority. For instance:
+
+    ./media_optimize_blocking -host 127.1 -port 8123 -start_key key000 -end_key key999 -start_key_inclusive true -end_key_inclusive true
 
 Object store examples
 ---------------------
